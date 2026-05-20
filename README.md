@@ -109,6 +109,19 @@ PYTHONPATH=src python -m agent_careflow.cli policy check-command --command "git 
 
 Hook adapters:
 
+
+Hook payload capture can be used as a sidecar runtime probe:
+
+```bash
+printf '{"tool_name":"Bash","tool_input":{"command":"date"}}' | \
+  PYTHONPATH=src python -m agent_careflow.cli hook capture \
+  --event-name PreToolUse \
+  --output .codex/probes/example/runtime-probe.jsonl \
+  --probe smoke-capture
+```
+
+The output uses `codex.runtime_probe.v1` JSONL so it can be validated with the runtime probe validator.
+
 ```bash
 PYTHONPATH=src python -m agent_careflow.cli hook codex pre-tool-use < tests/fixtures/hooks/codex_pre_tool_use_bash_danger.json
 PYTHONPATH=src python -m agent_careflow.cli hook claude pre-tool-use --on-missing-context deny < tests/fixtures/hooks/claude_pre_tool_use_write_missing_context.json

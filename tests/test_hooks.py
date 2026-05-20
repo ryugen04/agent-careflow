@@ -44,3 +44,35 @@ def test_cursor_renderer_uses_generic_block_shape() -> None:
     rendered = json.loads(cursor.render_pre_tool_use(decision))
 
     assert rendered == {"decision": "block", "reason": "git reset --hard is blocked by policy"}
+
+
+
+def test_hook_capture_writes_probe_log_record(tmp_path: Path) -> None:
+    from agent_careflow.hooks.capture import append_capture_record
+
+    output = tmp_path / "probe.jsonl"
+    append_capture_record(
+        output=output,
+        event="PreToolUse",
+        probe="unit-capture",
+        cwd=tmp_path,
+        input_payload={"tool_name": "Bash", "tool_input": {"command": "date"}},
+    )
+
+    record = json.loads(output.read_text(encoding="utf-8"))
+    assert record["schema"] == "codex.runtime_probe.v1"
+    assert record["event"] == "PreToolUse"
+    assert record["input_payload"]["tool_name"] == "Bash"
+    assert record["verdict"] == "inconclusive"
+
+
+def test_hook_capture_rejects_unknown_event(tmp_path: Path) -> None:
+    from agent_careflow.artifacts import ValidationError
+    from agent_careflow.hooks.capture import append_capture_record
+
+    try:
+        append_capture_record(output=tmp_path / "probe.jsonl", event="Unknown", probe="unit", cwd=tmp_path, input_payload={})
+    except ValidationError as exc:
+        assert "unsupported probe event" in str(exc)
+    else:
+        raise AssertionError("expected ValidationError")

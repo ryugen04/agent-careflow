@@ -1,0 +1,1 @@
+hook capture smoke log written to .codex/probes/2026-05-21-hook-capture-smoke/runtime-probe.jsonl and validated with validate_probe_log.py.

@@ -8,6 +8,7 @@ from .artifacts import ValidationError, case_dir, sha256_file, validate_case, va
 from .constants import CASES_DIR, RISK_CLASSES
 from .policy.engine import PolicyEngine
 from .hooks.common import evaluate_permission_request, evaluate_pre_tool_use, load_payload
+from .hooks.capture import append_capture_record
 from .hooks import claude as claude_hooks
 from .hooks import codex as codex_hooks
 from .hooks import cursor as cursor_hooks
@@ -239,6 +240,23 @@ def cmd_takt_analyze(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_hook_capture(args: argparse.Namespace) -> int:
+    try:
+        payload = load_payload(sys.stdin.read())
+        append_capture_record(
+            output=Path(args.output),
+            event=args.event_name,
+            probe=args.probe,
+            cwd=Path.cwd(),
+            input_payload=payload,
+            verdict=args.verdict,
+            notes=args.notes,
+        )
+    except ValidationError as exc:
+        return fail(exc)
+    return ok(f"hook payload captured: {args.output}")
+
+
 def cmd_hook(args: argparse.Namespace) -> int:
     try:
         payload = load_payload(sys.stdin.read())
@@ -399,6 +417,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     hook = sub.add_parser("hook")
     hook_sub = hook.add_subparsers(dest="tool", required=True)
+    capture = hook_sub.add_parser("capture")
+    capture.add_argument("--event-name", required=True)
+    capture.add_argument("--output", required=True)
+    capture.add_argument("--probe", default="hook-payload-capture")
+    capture.add_argument("--verdict", choices=["pass", "fail", "inconclusive"], default="inconclusive")
+    capture.add_argument("--notes", default="runtime-observed: captured hook stdin payload")
+    capture.set_defaults(func=cmd_hook_capture)
     for tool_name in ("codex", "claude", "cursor"):
         tool_parser = hook_sub.add_parser(tool_name)
         event_sub = tool_parser.add_subparsers(dest="event", required=True)
