@@ -14,6 +14,7 @@ from .hooks import cursor as cursor_hooks
 from .research import scaffold_research
 from .templates import render_case, render_discharge, render_plan
 from .bootstrap.target_repo import bootstrap_target_repo
+from .lifecycle import advance_phase, case_status, issue_order, new_incident, validate_result, validate_review
 
 
 def ok(message: str) -> int:
@@ -94,6 +95,58 @@ def cmd_discharge_validate(args: argparse.Namespace) -> int:
     except (OSError, ValidationError) as exc:
         return fail(exc)
     return ok(f"discharge valid: {path}")
+
+
+def cmd_phase_status(args: argparse.Namespace) -> int:
+    try:
+        status = case_status(Path.cwd(), args.case)
+    except ValidationError as exc:
+        return fail(exc)
+    print(f"case={status['case_id']} phase={status['phase']} status={status['status']} evidence={status['evidence_count']} open_incidents={len(status['open_incidents'])}")
+    return 0
+
+
+def cmd_phase_advance(args: argparse.Namespace) -> int:
+    try:
+        advance_phase(Path.cwd(), args.case, args.to)
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return ok(f"phase advanced: {args.case} -> {args.to}")
+
+
+def cmd_order_issue(args: argparse.Namespace) -> int:
+    try:
+        path = issue_order(Path.cwd(), args.case, args.order, args.role)
+        validate_order(path, Path.cwd())
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return ok(f"order issued: {path}")
+
+
+def cmd_result_validate(args: argparse.Namespace) -> int:
+    path = case_dir(Path.cwd(), args.case) / "results" / args.result
+    try:
+        validate_result(path)
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return ok(f"result valid: {path}")
+
+
+def cmd_review_validate(args: argparse.Namespace) -> int:
+    path = case_dir(Path.cwd(), args.case) / "reviews" / args.review
+    try:
+        validate_review(path)
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return ok(f"review valid: {path}")
+
+
+def cmd_incident_new(args: argparse.Namespace) -> int:
+    try:
+        path = new_incident(Path.cwd(), args.case, args.trigger)
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return ok(f"incident created: {path}")
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -200,6 +253,42 @@ def build_parser() -> argparse.ArgumentParser:
     order_validate.add_argument("--case", required=True)
     order_validate.add_argument("--order", required=True)
     order_validate.set_defaults(func=cmd_order_validate)
+    order_issue = order_sub.add_parser("issue")
+    order_issue.add_argument("--case", required=True)
+    order_issue.add_argument("--order", required=True)
+    order_issue.add_argument("--role", required=True)
+    order_issue.set_defaults(func=cmd_order_issue)
+
+    result = sub.add_parser("result")
+    result_sub = result.add_subparsers(dest="result_command", required=True)
+    result_validate = result_sub.add_parser("validate")
+    result_validate.add_argument("--case", required=True)
+    result_validate.add_argument("--result", required=True)
+    result_validate.set_defaults(func=cmd_result_validate)
+
+    review = sub.add_parser("review")
+    review_sub = review.add_subparsers(dest="review_command", required=True)
+    review_validate = review_sub.add_parser("validate")
+    review_validate.add_argument("--case", required=True)
+    review_validate.add_argument("--review", required=True)
+    review_validate.set_defaults(func=cmd_review_validate)
+
+    incident = sub.add_parser("incident")
+    incident_sub = incident.add_subparsers(dest="incident_command", required=True)
+    incident_new = incident_sub.add_parser("new")
+    incident_new.add_argument("--case", required=True)
+    incident_new.add_argument("--trigger", required=True)
+    incident_new.set_defaults(func=cmd_incident_new)
+
+    phase = sub.add_parser("phase")
+    phase_sub = phase.add_subparsers(dest="phase_command", required=True)
+    phase_status = phase_sub.add_parser("status")
+    phase_status.add_argument("--case", required=True)
+    phase_status.set_defaults(func=cmd_phase_status)
+    phase_advance = phase_sub.add_parser("advance")
+    phase_advance.add_argument("--case", required=True)
+    phase_advance.add_argument("--to", required=True)
+    phase_advance.set_defaults(func=cmd_phase_advance)
 
     discharge = sub.add_parser("discharge")
     discharge_sub = discharge.add_subparsers(dest="discharge_command", required=True)

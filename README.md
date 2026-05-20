@@ -62,6 +62,19 @@ If installed as a package, the console command is `agent-careflow`.
 
 
 
+
+Case lifecycle commands cover the first end-to-end case operations:
+
+```bash
+PYTHONPATH=src python -m agent_careflow.cli phase status --case ACF-BOOTSTRAP
+PYTHONPATH=src python -m agent_careflow.cli phase advance --case ACF-BOOTSTRAP --to review
+PYTHONPATH=src python -m agent_careflow.cli order issue --case ACF-BOOTSTRAP --order ORD-002 --role verifier
+PYTHONPATH=src python -m agent_careflow.cli incident new --case ACF-BOOTSTRAP --trigger scope_violation
+PYTHONPATH=src python -m agent_careflow.cli result validate --case ACF-BOOTSTRAP --result ORD-001-research.result.md
+```
+
+Phase advancement blocks review/conference/discharge when required evidence is missing, and discharge also blocks on open incidents.
+
 Target repositories can be bootstrapped from the central control repo:
 
 ```bash
