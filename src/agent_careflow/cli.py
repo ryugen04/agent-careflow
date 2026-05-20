@@ -13,6 +13,7 @@ from .hooks import codex as codex_hooks
 from .hooks import cursor as cursor_hooks
 from .research import scaffold_research
 from .templates import render_case, render_discharge, render_plan
+from .bootstrap.target_repo import bootstrap_target_repo
 
 
 def ok(message: str) -> int:
@@ -101,6 +102,14 @@ def cmd_init(args: argparse.Namespace) -> int:
     return ok("agent-careflow repository initialized")
 
 
+def cmd_bootstrap(args: argparse.Namespace) -> int:
+    try:
+        written = bootstrap_target_repo(target=Path(args.target), control_repo=Path(args.careflow_repo), profile_name=args.profile)
+    except ValidationError as exc:
+        return fail(exc)
+    return ok(f"bootstrap complete ({len(written)} file(s) written)")
+
+
 def cmd_policy_check_file(args: argparse.Namespace) -> int:
     try:
         decision = PolicyEngine(Path.cwd()).check_file(
@@ -157,6 +166,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     init = sub.add_parser("init")
     init.set_defaults(func=cmd_init)
+
+    bootstrap = sub.add_parser("bootstrap")
+    bootstrap.add_argument("--target", default=".")
+    bootstrap.add_argument("--profile", default="business")
+    bootstrap.add_argument("--careflow-repo", default=str(Path.cwd()))
+    bootstrap.set_defaults(func=cmd_bootstrap)
 
     research = sub.add_parser("research")
     research_sub = research.add_subparsers(dest="research_command", required=True)

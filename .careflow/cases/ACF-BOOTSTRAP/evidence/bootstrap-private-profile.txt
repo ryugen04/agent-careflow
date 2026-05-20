@@ -1,0 +1,1 @@
+bootstrap --profile private wrote .careflow, .codex, and .cursor files; no .claude directory was generated.

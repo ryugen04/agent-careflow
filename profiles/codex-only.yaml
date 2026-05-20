@@ -1,0 +1,5 @@
+name: codex-only
+tools:
+  codex: true
+  claude: false
+  cursor: false

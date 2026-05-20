@@ -1,0 +1,5 @@
+name: private
+tools:
+  codex: true
+  claude: false
+  cursor: true

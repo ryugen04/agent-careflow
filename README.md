@@ -61,6 +61,16 @@ PYTHONPATH=src python -m agent_careflow.cli discharge validate --case ACF-BOOTST
 If installed as a package, the console command is `agent-careflow`.
 
 
+
+Target repositories can be bootstrapped from the central control repo:
+
+```bash
+PYTHONPATH=src python -m agent_careflow.cli bootstrap --target /path/to/target --profile business --careflow-repo /path/to/agent-careflow
+PYTHONPATH=src python -m agent_careflow.cli bootstrap --target /path/to/target --profile private --careflow-repo /path/to/agent-careflow
+```
+
+The `private` profile writes Codex and Cursor hook config but intentionally does not create `.claude/`.
+
 Hook adapters are available as thin wrappers around the shared policy engine:
 
 ```bash
