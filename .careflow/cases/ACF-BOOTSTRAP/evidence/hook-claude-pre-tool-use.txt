@@ -1,0 +1,1 @@
+Claude pre-tool-use fixture returned permissionDecision deny when --on-missing-context deny was used.

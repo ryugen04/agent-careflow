@@ -41,3 +41,7 @@ Defer adapter implementation until fixture capture and runtime probing.
 ## References to add to PLAN
 
 R-003 should inform Codex adapter and hook fixtures.
+
+## Milestone 3 notes
+
+Codex hook adapters are implemented as thin wrappers around the shared CLI policy engine. The implementation follows the official Codex hooks shape for JSON stdin, `PreToolUse` tool fields, and `hookSpecificOutput.permissionDecision` deny responses. `PermissionRequest` remains represented as a Codex-specific renderer and should be validated against local runtime fixtures before production use.

@@ -60,6 +60,16 @@ PYTHONPATH=src python -m agent_careflow.cli discharge validate --case ACF-BOOTST
 
 If installed as a package, the console command is `agent-careflow`.
 
+
+Hook adapters are available as thin wrappers around the shared policy engine:
+
+```bash
+PYTHONPATH=src python -m agent_careflow.cli hook codex pre-tool-use < tests/fixtures/hooks/codex_pre_tool_use_bash_danger.json
+PYTHONPATH=src python -m agent_careflow.cli hook claude pre-tool-use --on-missing-context deny < tests/fixtures/hooks/claude_pre_tool_use_write_missing_context.json
+```
+
+The hook adapter layer returns tool-specific JSON, while policy decisions remain centralized in `agent_careflow.policy`.
+
 Policy checks are available for the Milestone 2 gate model:
 
 ```bash

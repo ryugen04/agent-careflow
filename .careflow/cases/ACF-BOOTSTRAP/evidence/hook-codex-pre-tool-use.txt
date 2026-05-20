@@ -1,0 +1,1 @@
+Codex pre-tool-use fixture returned permissionDecision deny for git reset --hard.

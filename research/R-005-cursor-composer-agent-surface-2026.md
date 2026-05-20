@@ -42,3 +42,7 @@ Treat Cursor as a useful orchestrator but not the sole policy authority.
 ## References to add to PLAN
 
 R-005 should inform Cursor adapter design.
+
+## Milestone 3 notes
+
+Cursor hook support is represented as a generic adapter renderer pending fixture capture from a local Cursor runtime. Policy decisions are still produced by the shared CLI engine, not Cursor-specific configuration.

@@ -1,0 +1,46 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from agent_careflow.hooks import claude, codex, cursor
+from agent_careflow.hooks.common import evaluate_pre_tool_use, load_payload
+from agent_careflow.policy.decisions import DecisionStatus
+
+FIXTURES = Path(__file__).parent / "fixtures" / "hooks"
+
+
+def test_codex_pre_tool_use_blocks_dangerous_bash() -> None:
+    payload = load_payload((FIXTURES / "codex_pre_tool_use_bash_danger.json").read_text(encoding="utf-8"))
+    decision = evaluate_pre_tool_use(payload)
+    rendered = json.loads(codex.render_pre_tool_use(decision))
+
+    assert decision.status == DecisionStatus.DENY
+    assert rendered["hookSpecificOutput"]["hookEventName"] == "PreToolUse"
+    assert rendered["hookSpecificOutput"]["permissionDecision"] == "deny"
+    assert "git reset --hard" in rendered["hookSpecificOutput"]["permissionDecisionReason"]
+
+
+def test_claude_pre_tool_use_warns_when_context_missing_by_default() -> None:
+    payload = load_payload((FIXTURES / "claude_pre_tool_use_write_missing_context.json").read_text(encoding="utf-8"))
+    decision = evaluate_pre_tool_use(payload)
+    rendered = json.loads(claude.render_pre_tool_use(decision))
+
+    assert decision.status == DecisionStatus.WARN
+    assert "systemMessage" in rendered
+
+
+def test_missing_context_can_fail_closed() -> None:
+    payload = load_payload((FIXTURES / "claude_pre_tool_use_write_missing_context.json").read_text(encoding="utf-8"))
+    decision = evaluate_pre_tool_use(payload, on_missing_context="deny")
+
+    assert decision.status == DecisionStatus.DENY
+    assert "case_id" in decision.reason
+
+
+def test_cursor_renderer_uses_generic_block_shape() -> None:
+    payload = load_payload((FIXTURES / "codex_pre_tool_use_bash_danger.json").read_text(encoding="utf-8"))
+    decision = evaluate_pre_tool_use(payload)
+    rendered = json.loads(cursor.render_pre_tool_use(decision))
+
+    assert rendered == {"decision": "block", "reason": "git reset --hard is blocked by policy"}

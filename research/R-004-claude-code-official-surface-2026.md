@@ -41,3 +41,7 @@ Keep Claude as an optional adapter outside v0.1 core validation.
 ## References to add to PLAN
 
 R-004 should inform business and private profiles.
+
+## Milestone 3 notes
+
+Claude hook adapters are implemented as optional thin wrappers. The renderer uses the documented `PreToolUse` JSON output shape with `hookSpecificOutput.permissionDecision` and keeps Claude outside the core policy implementation.

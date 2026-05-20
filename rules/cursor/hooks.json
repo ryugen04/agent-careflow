@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": "agent-careflow hook cursor pre-tool-use --on-missing-context warn"
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "agent-careflow hook cursor post-tool-use --on-missing-context warn"
+      }
+    ]
+  }
+}
