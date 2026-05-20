@@ -41,3 +41,7 @@ Treat TAKT as a comparison and future interop target, not as a v0.x dependency.
 ## References to add to PLAN
 
 R-002 should inform adapter and isolation design.
+
+## Milestone 7 notes
+
+The v0.x default isolation strategy is `git worktree`. `git clone --shared` and temporary clone strategies are represented as plans but are not executed by the CLI in this milestone. Shared/temp clone cleanup is explicitly marked destructive and must be approved before execution.

@@ -64,6 +64,15 @@ If installed as a package, the console command is `agent-careflow`.
 
 
 
+
+Isolation planning is available before launching long-running agents:
+
+```bash
+PYTHONPATH=src python -m agent_careflow.cli isolation plan --target . --case ACF-BOOTSTRAP --strategy worktree
+```
+
+`worktree` is the default v0.x strategy. Shared/temp clone strategies are rendered as plans only and their destructive cleanup commands require explicit approval before execution.
+
 Subagent order prompts can be rendered for supported tools:
 
 ```bash

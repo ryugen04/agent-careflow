@@ -1,0 +1,1 @@
+isolation plan --strategy worktree rendered git worktree add/remove commands without executing them.

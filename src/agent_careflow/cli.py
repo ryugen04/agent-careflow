@@ -16,6 +16,7 @@ from .templates import render_case, render_discharge, render_plan
 from .bootstrap.target_repo import bootstrap_target_repo
 from .lifecycle import advance_phase, case_status, issue_order, new_incident, validate_result, validate_review
 from .orders import order_status, render_order_prompt
+from .isolation import plan_isolation, render_isolation_plan
 
 
 def ok(message: str) -> int:
@@ -202,6 +203,15 @@ def cmd_policy_check_command(args: argparse.Namespace) -> int:
     return 0 if decision.allowed else 1
 
 
+def cmd_isolation_plan(args: argparse.Namespace) -> int:
+    try:
+        plan = plan_isolation(target=Path(args.target), case_id=args.case, strategy=args.strategy, base_ref=args.base_ref)
+    except ValidationError as exc:
+        return fail(exc)
+    print(render_isolation_plan(plan))
+    return 0
+
+
 def cmd_hook(args: argparse.Namespace) -> int:
     try:
         payload = load_payload(sys.stdin.read())
@@ -335,6 +345,15 @@ def build_parser() -> argparse.ArgumentParser:
     check_command = policy_sub.add_parser("check-command")
     check_command.add_argument("--command", dest="command_text", required=True)
     check_command.set_defaults(func=cmd_policy_check_command)
+
+    isolation = sub.add_parser("isolation")
+    isolation_sub = isolation.add_subparsers(dest="isolation_command", required=True)
+    isolation_plan = isolation_sub.add_parser("plan")
+    isolation_plan.add_argument("--target", default=".")
+    isolation_plan.add_argument("--case", required=True)
+    isolation_plan.add_argument("--strategy", choices=["worktree", "shared-clone", "temp-clone"], default="worktree")
+    isolation_plan.add_argument("--base-ref", default="HEAD")
+    isolation_plan.set_defaults(func=cmd_isolation_plan)
 
     hook = sub.add_parser("hook")
     hook_sub = hook.add_subparsers(dest="tool", required=True)
