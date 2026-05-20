@@ -45,3 +45,7 @@ R-002 should inform adapter and isolation design.
 ## Milestone 7 notes
 
 The v0.x default isolation strategy is `git worktree`. `git clone --shared` and temporary clone strategies are represented as plans but are not executed by the CLI in this milestone. Shared/temp clone cleanup is explicitly marked destructive and must be approved before execution.
+
+## Milestone 8 notes
+
+TAKT comparative mode is implemented as `agent-careflow takt analyze`. It scans workflow text for concepts such as persona, policy, output, provider, review, worktree, and clone, then maps them to agent-careflow PLAN/ORDER/POLICY/REVIEW/isolation concepts. The command intentionally does not import or execute TAKT workflows.

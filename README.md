@@ -65,6 +65,15 @@ If installed as a package, the console command is `agent-careflow`.
 
 
 
+
+TAKT comparison reports can be generated without making TAKT a dependency:
+
+```bash
+PYTHONPATH=src python -m agent_careflow.cli takt analyze --workflow path/to/workflow.yaml
+```
+
+The analyzer maps recognizable workflow signals such as persona, policy, output, review, provider, and worktree to agent-careflow artifacts.
+
 Isolation planning is available before launching long-running agents:
 
 ```bash

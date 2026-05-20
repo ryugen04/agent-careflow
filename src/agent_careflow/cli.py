@@ -17,6 +17,7 @@ from .bootstrap.target_repo import bootstrap_target_repo
 from .lifecycle import advance_phase, case_status, issue_order, new_incident, validate_result, validate_review
 from .orders import order_status, render_order_prompt
 from .isolation import plan_isolation, render_isolation_plan
+from .takt import analyze_takt_workflow, render_takt_analysis
 
 
 def ok(message: str) -> int:
@@ -212,6 +213,20 @@ def cmd_isolation_plan(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_takt_analyze(args: argparse.Namespace) -> int:
+    try:
+        report = render_takt_analysis(analyze_takt_workflow(Path(args.workflow)))
+    except ValidationError as exc:
+        return fail(exc)
+    if args.output:
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(report, encoding="utf-8")
+        return ok(f"takt analysis written: {output}")
+    print(report)
+    return 0
+
+
 def cmd_hook(args: argparse.Namespace) -> int:
     try:
         payload = load_payload(sys.stdin.read())
@@ -354,6 +369,13 @@ def build_parser() -> argparse.ArgumentParser:
     isolation_plan.add_argument("--strategy", choices=["worktree", "shared-clone", "temp-clone"], default="worktree")
     isolation_plan.add_argument("--base-ref", default="HEAD")
     isolation_plan.set_defaults(func=cmd_isolation_plan)
+
+    takt = sub.add_parser("takt")
+    takt_sub = takt.add_subparsers(dest="takt_command", required=True)
+    takt_analyze = takt_sub.add_parser("analyze")
+    takt_analyze.add_argument("--workflow", required=True)
+    takt_analyze.add_argument("--output")
+    takt_analyze.set_defaults(func=cmd_takt_analyze)
 
     hook = sub.add_parser("hook")
     hook_sub = hook.add_subparsers(dest="tool", required=True)
