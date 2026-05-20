@@ -129,15 +129,21 @@ def case_dir(root: Path, case_id: str) -> Path:
 
 
 def validate_case(case_path: Path) -> None:
+    from .schema_validation import validate_data_against_schema
+
     data = parse_front_matter_lines(case_path.read_text(encoding="utf-8"))
+    validate_data_against_schema(data, "CASE", case_path)
     require_fields(data, ["case_id", "title", "risk", "phase", "status", "created_at", "owner"], case_path)
     if data["risk"] not in RISK_CLASSES:
         raise ValidationError(f"{case_path}: invalid risk class {data['risk']!r}")
 
 
 def validate_plan(plan_path: Path, *, require_lock: bool = False) -> None:
+    from .schema_validation import validate_data_against_schema
+
     text = plan_path.read_text(encoding="utf-8")
     data = parse_front_matter_lines(text)
+    validate_data_against_schema(data, "PLAN", plan_path)
     require_fields(data, ["case_id", "status", "risk", "owner"], plan_path)
     required_sections = [
         "## Objective",
@@ -159,9 +165,12 @@ def validate_plan(plan_path: Path, *, require_lock: bool = False) -> None:
 
 
 def validate_order(order_path: Path, repo_root: Path | None = None) -> None:
+    from .schema_validation import validate_data_against_schema
+
     repo_root = repo_root or Path.cwd()
     text = order_path.read_text(encoding="utf-8")
     data = parse_front_matter_lines(text)
+    validate_data_against_schema(data, "ORDER", order_path)
     require_fields(
         data,
         [
@@ -193,8 +202,11 @@ def validate_order(order_path: Path, repo_root: Path | None = None) -> None:
 
 
 def validate_discharge(discharge_path: Path, case_root: Path | None = None) -> None:
+    from .schema_validation import validate_data_against_schema
+
     text = discharge_path.read_text(encoding="utf-8")
     data = parse_front_matter_lines(text)
+    validate_data_against_schema(data, "DISCHARGE", discharge_path)
     require_fields(data, ["case_id", "status", "evidence"], discharge_path)
     case_root = case_root or discharge_path.parent
     evidence_dir = case_root / "evidence"

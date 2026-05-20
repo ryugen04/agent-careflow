@@ -1,0 +1,1 @@
+/home/glaucus03/.pyenv/versions/3.10.6/bin/agent-careflow plan validate --case ACF-BOOTSTRAP --require-lock passed. Bare agent-careflow remains unavailable because scripts dir is outside PATH.

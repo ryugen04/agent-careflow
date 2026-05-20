@@ -74,7 +74,7 @@ PYTHONPATH=src python -m agent_careflow.cli hash plan --case ACF-BOOTSTRAP --wri
 PYTHONPATH=src python -m agent_careflow.cli plan validate --case ACF-BOOTSTRAP --require-lock
 ```
 
-When `PLAN.lock.json` exists, ORDER validation checks that `plan_hash` matches both `PLAN.md` and the lock file.
+When `PLAN.lock.json` exists, ORDER validation checks that `plan_hash` matches both `PLAN.md` and the lock file. Runtime validators read the bundled schema files for required fields, enum values, const values, simple types, and hash patterns.
 
 ```bash
 PYTHONPATH=src python -m agent_careflow.cli research validate

@@ -89,12 +89,18 @@ def issue_order(root: Path, case_id: str, order_id: str, role: str) -> Path:
 
 
 def validate_result(path: Path) -> None:
+    from .schema_validation import validate_data_against_schema
+
     data = parse_front_matter_lines(path.read_text(encoding="utf-8"))
+    validate_data_against_schema(data, "RESULT", path)
     require_fields(data, ["order_id", "case_id", "status"], path)
 
 
 def validate_review(path: Path) -> None:
+    from .schema_validation import validate_data_against_schema
+
     data = parse_front_matter_lines(path.read_text(encoding="utf-8"))
+    validate_data_against_schema(data, "REVIEW", path)
     require_fields(data, ["review_id", "case_id", "status"], path)
     if data["status"] not in {"pass", "needs_changes", "blocked"}:
         raise ValidationError(f"{path}: invalid review status {data['status']!r}")
