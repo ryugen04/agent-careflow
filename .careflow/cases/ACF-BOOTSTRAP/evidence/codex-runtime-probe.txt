@@ -1,0 +1,1 @@
+Codex runtime probe log written to .codex/probes/2026-05-21-hook-runtime/runtime-probe.jsonl and validated with validate_probe_log.py. Observed codex-cli 0.131.0.

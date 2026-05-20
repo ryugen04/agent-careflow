@@ -45,3 +45,7 @@ R-003 should inform Codex adapter and hook fixtures.
 ## Milestone 3 notes
 
 Codex hook adapters are implemented as thin wrappers around the shared CLI policy engine. The implementation follows the official Codex hooks shape for JSON stdin, `PreToolUse` tool fields, and `hookSpecificOutput.permissionDecision` deny responses. `PermissionRequest` remains represented as a Codex-specific renderer and should be validated against local runtime fixtures before production use.
+
+## Runtime probe 2026-05-21
+
+runtime-observed: `codex --version` reports `codex-cli 0.131.0`. `codex --help` and `codex --profile codex-config-edit --help` complete successfully. Local adapter renderer probes for Codex `PreToolUse` and `PermissionRequest` produce deny JSON for dangerous command fixtures, and the probe log validates as `codex.runtime_probe.v1`. This does not yet prove live Codex hook event payload shape from an interactive session; that remains a separate fixture-capture task.
