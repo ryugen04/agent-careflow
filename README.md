@@ -1,6 +1,6 @@
 # agent-careflow
 
-`agent-careflow` is a control repository for AI coding-agent workflows. It does not replace Codex, Claude Code, Cursor, or TAKT. It provides the artifact protocol, validators, templates, and future hook/policy entrypoints that keep those tools working against the same case record.
+`agent-careflow` is a control repository for AI coding-agent workflows. It does not replace Codex, Claude Code, Cursor, or TAKT. It provides artifact protocols, validators, policy checks, hook adapters, profile bootstrap, and comparison tools that keep those agents working against the same case record.
 
 This project borrows workflow structure from healthcare operations: cases, plans, orders, handoffs, incidents, reviews, and discharge checks. It is not a medical system and does not provide clinical safety functionality.
 
@@ -8,12 +8,12 @@ This project borrows workflow structure from healthcare operations: cases, plans
 
 Static control assets live in this repository:
 
-- schemas
-- templates
-- rules and future adapter configs
-- CLI validators
-- research reports
-- policies and hooks in later milestones
+- schemas and templates
+- rules and adapter configs
+- CLI validators and policy checks
+- hook adapter entrypoints
+- research reports and source registry
+- profile and bootstrap definitions
 
 Runtime artifacts for a target project live in that target repository under `.careflow/`:
 
@@ -44,56 +44,25 @@ Runtime artifacts for a target project live in that target repository under `.ca
 - allowed and forbidden actions
 - completion criteria
 
-The validator rejects orders that omit the plan path or reference a stale plan hash.
+The validator rejects orders that omit the plan path or reference a stale plan hash. An order is incomplete until its `expected_result_path` exists.
 
 ## CLI
 
-Run from the repository root during v0.1 development:
+Run from the repository root during local development with `PYTHONPATH=src`, or install the package and use the `agent-careflow` console script.
+
+Core validation:
 
 ```bash
 PYTHONPATH=src python -m agent_careflow.cli research validate
-PYTHONPATH=src python -m agent_careflow.cli case new --title "Small bugfix" --risk C1
 PYTHONPATH=src python -m agent_careflow.cli plan validate --case ACF-BOOTSTRAP
 PYTHONPATH=src python -m agent_careflow.cli order validate --case ACF-BOOTSTRAP --order ORD-001-research
 PYTHONPATH=src python -m agent_careflow.cli discharge validate --case ACF-BOOTSTRAP
 ```
 
-If installed as a package, the console command is `agent-careflow`.
-
-
-
-
-
-
-
-TAKT comparison reports can be generated without making TAKT a dependency:
+Case lifecycle:
 
 ```bash
-PYTHONPATH=src python -m agent_careflow.cli takt analyze --workflow path/to/workflow.yaml
-```
-
-The analyzer maps recognizable workflow signals such as persona, policy, output, review, provider, and worktree to agent-careflow artifacts.
-
-Isolation planning is available before launching long-running agents:
-
-```bash
-PYTHONPATH=src python -m agent_careflow.cli isolation plan --target . --case ACF-BOOTSTRAP --strategy worktree
-```
-
-`worktree` is the default v0.x strategy. Shared/temp clone strategies are rendered as plans only and their destructive cleanup commands require explicit approval before execution.
-
-Subagent order prompts can be rendered for supported tools:
-
-```bash
-PYTHONPATH=src python -m agent_careflow.cli order prompt --case ACF-BOOTSTRAP --order ORD-001-research --tool codex
-PYTHONPATH=src python -m agent_careflow.cli order status --case ACF-BOOTSTRAP --order ORD-001-research
-```
-
-An order is incomplete until its `expected_result_path` exists.
-
-Case lifecycle commands cover the first end-to-end case operations:
-
-```bash
+PYTHONPATH=src python -m agent_careflow.cli case new --title "Small bugfix" --risk C1
 PYTHONPATH=src python -m agent_careflow.cli phase status --case ACF-BOOTSTRAP
 PYTHONPATH=src python -m agent_careflow.cli phase advance --case ACF-BOOTSTRAP --to review
 PYTHONPATH=src python -m agent_careflow.cli order issue --case ACF-BOOTSTRAP --order ORD-002 --role verifier
@@ -101,9 +70,21 @@ PYTHONPATH=src python -m agent_careflow.cli incident new --case ACF-BOOTSTRAP --
 PYTHONPATH=src python -m agent_careflow.cli result validate --case ACF-BOOTSTRAP --result ORD-001-research.result.md
 ```
 
-Phase advancement blocks review/conference/discharge when required evidence is missing, and discharge also blocks on open incidents.
+Policy checks:
 
-Target repositories can be bootstrapped from the central control repo:
+```bash
+PYTHONPATH=src python -m agent_careflow.cli policy check-file --case ACF-BOOTSTRAP --path src/app.py --operation write
+PYTHONPATH=src python -m agent_careflow.cli policy check-command --command "git reset --hard HEAD"
+```
+
+Hook adapters:
+
+```bash
+PYTHONPATH=src python -m agent_careflow.cli hook codex pre-tool-use < tests/fixtures/hooks/codex_pre_tool_use_bash_danger.json
+PYTHONPATH=src python -m agent_careflow.cli hook claude pre-tool-use --on-missing-context deny < tests/fixtures/hooks/claude_pre_tool_use_write_missing_context.json
+```
+
+Target repo bootstrap:
 
 ```bash
 PYTHONPATH=src python -m agent_careflow.cli bootstrap --target /path/to/target --profile business --careflow-repo /path/to/agent-careflow
@@ -112,38 +93,39 @@ PYTHONPATH=src python -m agent_careflow.cli bootstrap --target /path/to/target -
 
 The `private` profile writes Codex and Cursor hook config but intentionally does not create `.claude/`.
 
-Hook adapters are available as thin wrappers around the shared policy engine:
+Order prompts:
 
 ```bash
-PYTHONPATH=src python -m agent_careflow.cli hook codex pre-tool-use < tests/fixtures/hooks/codex_pre_tool_use_bash_danger.json
-PYTHONPATH=src python -m agent_careflow.cli hook claude pre-tool-use --on-missing-context deny < tests/fixtures/hooks/claude_pre_tool_use_write_missing_context.json
+PYTHONPATH=src python -m agent_careflow.cli order prompt --case ACF-BOOTSTRAP --order ORD-001-research --tool codex
+PYTHONPATH=src python -m agent_careflow.cli order status --case ACF-BOOTSTRAP --order ORD-001-research
 ```
 
-The hook adapter layer returns tool-specific JSON, while policy decisions remain centralized in `agent_careflow.policy`.
-
-Policy checks are available for the Milestone 2 gate model:
+Isolation and TAKT comparison:
 
 ```bash
-PYTHONPATH=src python -m agent_careflow.cli policy check-file --case ACF-BOOTSTRAP --path src/app.py --operation write
-PYTHONPATH=src python -m agent_careflow.cli policy check-command --command "git reset --hard HEAD"
+PYTHONPATH=src python -m agent_careflow.cli isolation plan --target . --case ACF-BOOTSTRAP --strategy worktree
+PYTHONPATH=src python -m agent_careflow.cli takt analyze --workflow path/to/workflow.yaml
 ```
 
-## Milestone status
+`worktree` is the default v0.x isolation strategy. Shared/temp clone strategies are rendered as plans only and their destructive cleanup commands require explicit approval before execution. TAKT comparison maps recognizable workflow signals such as persona, policy, output, review, provider, and worktree to agent-careflow artifacts without making TAKT a dependency.
 
-Implemented in this initial pass:
+## Implemented scope
 
-- research scaffold and validation
-- source authority level checks in report tables
-- CASE, PLAN, ORDER, and DISCHARGE validators
-- `case new`
-- rejection of mismatched order plan hashes
-- rejection of discharge without evidence
-- focused tests
+Implemented through Milestone 8:
 
-Deferred:
+- research scaffold, source registry, and validation
+- CASE, PLAN, ORDER, RESULT, INCIDENT, REVIEW, CONFERENCE, and DISCHARGE artifact validation surface
+- case creation, phase status/advance, order issue/prompt/status, result/review validation, and incident creation
+- policy engine for phase/file/command gates
+- Codex, Claude, and Cursor hook adapter entrypoints with fixtures
+- target repository bootstrap profiles, including private profile without Claude
+- isolation planning with worktree as default
+- TAKT comparative analysis mode
+- focused unit and fixture tests
 
-- hook adapters
-- full policy engine
-- target repository bootstrap profiles
-- subagent prompt generation
-- TAKT interop
+Deferred beyond this pass:
+
+- executing worktree/shared clone creation directly
+- signed plan locks and stronger tamper detection
+- production-grade JSON Schema coverage for every artifact field
+- local runtime fixture capture for every vendor hook version
