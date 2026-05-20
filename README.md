@@ -4,6 +4,20 @@
 
 This project borrows workflow structure from healthcare operations: cases, plans, orders, handoffs, incidents, reviews, and discharge checks. It is not a medical system and does not provide clinical safety functionality.
 
+
+## Quickstart
+
+From a fresh checkout:
+
+```bash
+python -m pip install -e .
+PYTHONPATH=src python -m agent_careflow.cli research validate
+PYTHONPATH=src python -m agent_careflow.cli bootstrap --target /path/to/target --profile private --careflow-repo "$PWD"
+PYTHONPATH=src python -m agent_careflow.cli case new --title "Small bugfix" --risk C1
+```
+
+After installation, the console script is `agent-careflow`. If your shell cannot find it, ensure Python's scripts directory is on `PATH` or run the module form shown above.
+
 ## Repository split
 
 Static control assets live in this repository:

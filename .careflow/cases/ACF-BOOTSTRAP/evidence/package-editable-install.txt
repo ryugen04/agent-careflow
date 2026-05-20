@@ -1,0 +1,1 @@
+python -m pip install -e . succeeded. Console script was installed under /home/glaucus03/.pyenv/versions/3.10.6/bin, which is not on the current shell PATH. Absolute-path console script execution and module execution both work.
