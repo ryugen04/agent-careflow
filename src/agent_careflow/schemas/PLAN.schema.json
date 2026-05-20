@@ -1,5 +1,32 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "case_id": {
+      "type": "string"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "risk": {
+      "enum": [
+        "C0",
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ]
+    },
+    "status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_id",
+    "status",
+    "risk",
+    "owner"
+  ],
   "title": "agent-careflow PLAN",
   "type": "object"
 }

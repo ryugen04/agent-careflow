@@ -1,5 +1,25 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "case_id": {
+      "type": "string"
+    },
+    "evidence": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_id",
+    "status",
+    "evidence"
+  ],
   "title": "agent-careflow DISCHARGE",
   "type": "object"
 }

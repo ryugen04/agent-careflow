@@ -1,5 +1,17 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "phase_policies": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "name"
+  ],
   "title": "agent-careflow POLICY",
   "type": "object"
 }

@@ -4,6 +4,7 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
@@ -27,6 +28,60 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(65536), b""):
             digest.update(chunk)
     return f"sha256:{digest.hexdigest()}"
+
+
+def plan_lock_path(plan_path: Path) -> Path:
+    return plan_path.with_name("PLAN.lock.json")
+
+
+def build_plan_lock(plan_path: Path) -> dict[str, object]:
+    data = parse_front_matter_lines(plan_path.read_text(encoding="utf-8"))
+    require_fields(data, ["case_id", "risk", "status", "owner"], plan_path)
+    return {
+        "schema_version": 1,
+        "case_id": data["case_id"],
+        "plan_path": plan_path.name,
+        "plan_hash": sha256_file(plan_path),
+        "locked_at": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
+    }
+
+
+def write_plan_lock(plan_path: Path) -> Path:
+    lock_path = plan_lock_path(plan_path)
+    lock_path.write_text(json.dumps(build_plan_lock(plan_path), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return lock_path
+
+
+def read_plan_lock(lock_path: Path) -> dict[str, object]:
+    try:
+        lock = json.loads(lock_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValidationError(f"{lock_path}: invalid JSON: {exc}") from exc
+    if not isinstance(lock, dict):
+        raise ValidationError(f"{lock_path}: lock must be a JSON object")
+    return lock
+
+
+def validate_plan_lock(plan_path: Path, *, required: bool = False) -> None:
+    lock_path = plan_lock_path(plan_path)
+    if not lock_path.exists():
+        if required:
+            raise ValidationError(f"{lock_path}: missing PLAN lock")
+        return
+    lock = read_plan_lock(lock_path)
+    for field in ("schema_version", "case_id", "plan_path", "plan_hash", "locked_at"):
+        if field not in lock or lock[field] in ("", None):
+            raise ValidationError(f"{lock_path}: missing {field}")
+    if lock["schema_version"] != 1:
+        raise ValidationError(f"{lock_path}: unsupported schema_version {lock['schema_version']!r}")
+    plan_data = parse_front_matter_lines(plan_path.read_text(encoding="utf-8"))
+    if lock["case_id"] != plan_data.get("case_id"):
+        raise ValidationError(f"{lock_path}: case_id does not match PLAN.md")
+    if lock["plan_path"] != plan_path.name:
+        raise ValidationError(f"{lock_path}: plan_path must be {plan_path.name}")
+    actual_hash = sha256_file(plan_path)
+    if lock["plan_hash"] != actual_hash:
+        raise ValidationError(f"{lock_path}: stale plan lock: expected {lock['plan_hash']}, actual {actual_hash}")
 
 
 def parse_front_matter_lines(text: str) -> dict[str, object]:
@@ -80,7 +135,7 @@ def validate_case(case_path: Path) -> None:
         raise ValidationError(f"{case_path}: invalid risk class {data['risk']!r}")
 
 
-def validate_plan(plan_path: Path) -> None:
+def validate_plan(plan_path: Path, *, require_lock: bool = False) -> None:
     text = plan_path.read_text(encoding="utf-8")
     data = parse_front_matter_lines(text)
     require_fields(data, ["case_id", "status", "risk", "owner"], plan_path)
@@ -100,6 +155,7 @@ def validate_plan(plan_path: Path) -> None:
         raise ValidationError(f"{plan_path}: missing section(s): {', '.join(missing)}")
     if data["risk"] not in RISK_CLASSES:
         raise ValidationError(f"{plan_path}: invalid risk class {data['risk']!r}")
+    validate_plan_lock(plan_path, required=require_lock)
 
 
 def validate_order(order_path: Path, repo_root: Path | None = None) -> None:
@@ -128,6 +184,12 @@ def validate_order(order_path: Path, repo_root: Path | None = None) -> None:
     actual_hash = sha256_file(plan_path)
     if data["plan_hash"] != actual_hash:
         raise ValidationError(f"{order_path}: plan_hash mismatch: expected {data['plan_hash']}, actual {actual_hash}")
+    lock_path = plan_lock_path(plan_path)
+    if lock_path.exists():
+        validate_plan_lock(plan_path, required=True)
+        lock = read_plan_lock(lock_path)
+        if data["plan_hash"] != lock["plan_hash"]:
+            raise ValidationError(f"{order_path}: plan_hash does not match PLAN.lock.json")
 
 
 def validate_discharge(discharge_path: Path, case_root: Path | None = None) -> None:

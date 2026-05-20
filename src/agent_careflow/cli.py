@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .artifacts import ValidationError, case_dir, validate_case, validate_discharge, validate_order, validate_plan, validate_research
+from .artifacts import ValidationError, case_dir, sha256_file, validate_case, validate_discharge, validate_order, validate_plan, validate_research, write_plan_lock
 from .constants import CASES_DIR, RISK_CLASSES
 from .policy.engine import PolicyEngine
 from .hooks.common import evaluate_permission_request, evaluate_pre_tool_use, load_payload
@@ -72,10 +72,22 @@ def cmd_case_new(args: argparse.Namespace) -> int:
 def cmd_plan_validate(args: argparse.Namespace) -> int:
     path = case_dir(Path.cwd(), args.case) / "PLAN.md"
     try:
-        validate_plan(path)
+        validate_plan(path, require_lock=args.require_lock)
     except (OSError, ValidationError) as exc:
         return fail(exc)
     return ok(f"plan valid: {path}")
+
+
+def cmd_hash_plan(args: argparse.Namespace) -> int:
+    path = case_dir(Path.cwd(), args.case) / "PLAN.md"
+    try:
+        if args.write_lock:
+            lock_path = write_plan_lock(path)
+            return ok(f"plan lock written: {lock_path}")
+        print(sha256_file(path))
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return 0
 
 
 def cmd_order_validate(args: argparse.Namespace) -> int:
@@ -289,7 +301,15 @@ def build_parser() -> argparse.ArgumentParser:
     plan_sub = plan.add_subparsers(dest="plan_command", required=True)
     plan_validate = plan_sub.add_parser("validate")
     plan_validate.add_argument("--case", required=True)
+    plan_validate.add_argument("--require-lock", action="store_true")
     plan_validate.set_defaults(func=cmd_plan_validate)
+
+    hash_cmd = sub.add_parser("hash")
+    hash_sub = hash_cmd.add_subparsers(dest="hash_command", required=True)
+    hash_plan = hash_sub.add_parser("plan")
+    hash_plan.add_argument("--case", required=True)
+    hash_plan.add_argument("--write-lock", action="store_true")
+    hash_plan.set_defaults(func=cmd_hash_plan)
 
     order = sub.add_parser("order")
     order_sub = order.add_subparsers(dest="order_command", required=True)

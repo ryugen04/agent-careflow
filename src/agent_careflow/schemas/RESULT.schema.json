@@ -1,5 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "case_id": {
+      "type": "string"
+    },
+    "order_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "order_id",
+    "case_id",
+    "status"
+  ],
   "title": "agent-careflow RESULT",
   "type": "object"
 }

@@ -1,5 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "case_id": {
+      "type": "string"
+    },
+    "review_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "pass",
+        "needs_changes",
+        "blocked"
+      ]
+    }
+  },
+  "required": [
+    "review_id",
+    "case_id",
+    "status"
+  ],
   "title": "agent-careflow REVIEW",
   "type": "object"
 }

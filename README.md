@@ -52,6 +52,16 @@ Run from the repository root during local development with `PYTHONPATH=src`, or 
 
 Core validation:
 
+
+Plan locks bind ORDER execution to the exact PLAN content:
+
+```bash
+PYTHONPATH=src python -m agent_careflow.cli hash plan --case ACF-BOOTSTRAP --write-lock
+PYTHONPATH=src python -m agent_careflow.cli plan validate --case ACF-BOOTSTRAP --require-lock
+```
+
+When `PLAN.lock.json` exists, ORDER validation checks that `plan_hash` matches both `PLAN.md` and the lock file.
+
 ```bash
 PYTHONPATH=src python -m agent_careflow.cli research validate
 PYTHONPATH=src python -m agent_careflow.cli plan validate --case ACF-BOOTSTRAP
@@ -127,5 +137,5 @@ Deferred beyond this pass:
 
 - executing worktree/shared clone creation directly
 - signed plan locks and stronger tamper detection
-- production-grade JSON Schema coverage for every artifact field
+- deeper semantic JSON Schema coverage for cross-file relationships
 - local runtime fixture capture for every vendor hook version

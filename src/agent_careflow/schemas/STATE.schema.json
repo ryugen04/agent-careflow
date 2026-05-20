@@ -1,5 +1,21 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "active_case": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "phase": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "active_case",
+    "phase"
+  ],
   "title": "agent-careflow STATE",
   "type": "object"
 }

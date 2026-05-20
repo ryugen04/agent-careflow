@@ -1,5 +1,63 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "allowed_actions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "assigned_role": {
+      "type": "string"
+    },
+    "case_id": {
+      "type": "string"
+    },
+    "completion_criteria": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "deliverables": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "expected_result_path": {
+      "type": "string"
+    },
+    "forbidden_actions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "order_id": {
+      "type": "string"
+    },
+    "plan_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "plan_path": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "order_id",
+    "case_id",
+    "assigned_role",
+    "plan_path",
+    "plan_hash",
+    "allowed_actions",
+    "forbidden_actions",
+    "deliverables",
+    "expected_result_path",
+    "completion_criteria"
+  ],
   "title": "agent-careflow ORDER",
   "type": "object"
 }

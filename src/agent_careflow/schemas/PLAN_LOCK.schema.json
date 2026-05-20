@@ -5,30 +5,27 @@
     "case_id": {
       "type": "string"
     },
-    "created_at": {
+    "locked_at": {
       "type": "string"
     },
-    "incident_id": {
+    "plan_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
     },
-    "severity": {
+    "plan_path": {
       "type": "string"
     },
-    "status": {
-      "type": "string"
-    },
-    "trigger": {
-      "type": "string"
+    "schema_version": {
+      "const": 1
     }
   },
   "required": [
-    "incident_id",
+    "schema_version",
     "case_id",
-    "trigger",
-    "status",
-    "created_at",
-    "severity"
+    "plan_path",
+    "plan_hash",
+    "locked_at"
   ],
-  "title": "agent-careflow INCIDENT",
+  "title": "agent-careflow PLAN_LOCK",
   "type": "object"
 }

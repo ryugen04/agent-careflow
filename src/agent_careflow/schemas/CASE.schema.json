@@ -1,15 +1,59 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "agent-careflow CASE",
-  "type": "object",
-  "required": ["case_id", "title", "risk", "phase", "status", "created_at", "owner"],
+  "additionalProperties": true,
   "properties": {
-    "case_id": {"type": "string"},
-    "title": {"type": "string"},
-    "risk": {"enum": ["C0", "C1", "C2", "C3", "C4"]},
-    "phase": {"type": "string"},
-    "status": {"type": "string"},
-    "created_at": {"type": "string"},
-    "owner": {"type": "string"}
-  }
+    "allowed_scope": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "case_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "created_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "owner": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "phase": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "risk": {
+      "enum": [
+        "C0",
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ]
+    },
+    "status": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_id",
+    "title",
+    "risk",
+    "phase",
+    "status",
+    "created_at",
+    "owner"
+  ],
+  "title": "agent-careflow CASE",
+  "type": "object"
 }
