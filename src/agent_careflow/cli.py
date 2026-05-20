@@ -15,6 +15,7 @@ from .research import scaffold_research
 from .templates import render_case, render_discharge, render_plan
 from .bootstrap.target_repo import bootstrap_target_repo
 from .lifecycle import advance_phase, case_status, issue_order, new_incident, validate_result, validate_review
+from .orders import order_status, render_order_prompt
 
 
 def ok(message: str) -> int:
@@ -121,6 +122,24 @@ def cmd_order_issue(args: argparse.Namespace) -> int:
     except (OSError, ValidationError) as exc:
         return fail(exc)
     return ok(f"order issued: {path}")
+
+
+def cmd_order_prompt(args: argparse.Namespace) -> int:
+    try:
+        print(render_order_prompt(Path.cwd(), args.case, args.order, args.tool))
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return 0
+
+
+def cmd_order_status(args: argparse.Namespace) -> int:
+    try:
+        status = order_status(Path.cwd(), args.case, args.order)
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    completion = "complete" if status["complete"] else "incomplete"
+    print(f"order={status['order_id']} case={status['case_id']} status={completion} expected_result_path={status['expected_result_path']}")
+    return 0 if status["complete"] else 1
 
 
 def cmd_result_validate(args: argparse.Namespace) -> int:
@@ -258,6 +277,15 @@ def build_parser() -> argparse.ArgumentParser:
     order_issue.add_argument("--order", required=True)
     order_issue.add_argument("--role", required=True)
     order_issue.set_defaults(func=cmd_order_issue)
+    order_prompt = order_sub.add_parser("prompt")
+    order_prompt.add_argument("--case", required=True)
+    order_prompt.add_argument("--order", required=True)
+    order_prompt.add_argument("--tool", choices=["codex", "claude", "cursor"], required=True)
+    order_prompt.set_defaults(func=cmd_order_prompt)
+    order_status_parser = order_sub.add_parser("status")
+    order_status_parser.add_argument("--case", required=True)
+    order_status_parser.add_argument("--order", required=True)
+    order_status_parser.set_defaults(func=cmd_order_status)
 
     result = sub.add_parser("result")
     result_sub = result.add_subparsers(dest="result_command", required=True)

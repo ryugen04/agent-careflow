@@ -1,0 +1,1 @@
+order prompt includes plan_path, order_path, and expected_result_path for ORD-001-research.

@@ -63,6 +63,16 @@ If installed as a package, the console command is `agent-careflow`.
 
 
 
+
+Subagent order prompts can be rendered for supported tools:
+
+```bash
+PYTHONPATH=src python -m agent_careflow.cli order prompt --case ACF-BOOTSTRAP --order ORD-001-research --tool codex
+PYTHONPATH=src python -m agent_careflow.cli order status --case ACF-BOOTSTRAP --order ORD-001-research
+```
+
+An order is incomplete until its `expected_result_path` exists.
+
 Case lifecycle commands cover the first end-to-end case operations:
 
 ```bash
