@@ -27,12 +27,26 @@ def check_phase_file_access(
     operation: str,
     allowed_scope: list[str],
     has_active_order: bool,
+    phase_policies: dict[str, object] | None = None,
 ) -> Decision:
     operation = operation.lower()
     if operation not in {"read", "write"}:
         return deny(f"unsupported file operation: {operation}")
     if operation == "read":
         return allow("read allowed")
+
+    if phase_policies and phase in phase_policies and isinstance(phase_policies[phase], dict):
+        policy = phase_policies[phase]
+        if policy.get("deny_code_write") and is_code_path(path):
+            return deny(f"{phase} phase cannot write code paths")
+        if policy.get("require_active_order") and not has_active_order:
+            return deny(f"{phase} write requires an active ORDER")
+        allow_write = policy.get("allow_write")
+        if isinstance(allow_write, list):
+            return check_allowed_scope(path, [str(item) for item in allow_write])
+        if policy.get("require_active_order"):
+            return check_allowed_scope(path, allowed_scope)
+        return allow(f"{phase} write allowed by policy")
 
     if phase in {"planning", "intake"}:
         if is_code_path(path):

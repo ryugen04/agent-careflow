@@ -114,3 +114,41 @@ def test_forbidden_commands_are_denied() -> None:
 
 def test_regular_command_is_allowed() -> None:
     assert check_command("python -m pytest").status == DecisionStatus.ALLOW
+
+
+
+def test_command_policy_can_be_loaded_from_yaml(tmp_path: Path) -> None:
+    rules = tmp_path / "rules" / "global"
+    rules.mkdir(parents=True)
+    (rules / "command-policy.yaml").write_text(
+        """forbidden_commands:
+  - match: "custom deploy"
+    reason: "custom deploy is blocked"
+""",
+        encoding="utf-8",
+    )
+
+    decision = PolicyEngine(tmp_path).check_command("custom deploy production")
+
+    assert decision.status == DecisionStatus.DENY
+    assert decision.reason == "custom deploy is blocked"
+
+
+def test_phase_policy_can_be_loaded_from_yaml(tmp_path: Path) -> None:
+    write_case(tmp_path, "planning")
+    rules = tmp_path / "rules" / "global"
+    rules.mkdir(parents=True)
+    (rules / "phase-policy.yaml").write_text(
+        """phase_policies:
+  planning:
+    deny_code_write: false
+    allow_write:
+      - "docs/**"
+""",
+        encoding="utf-8",
+    )
+
+    engine = PolicyEngine(tmp_path)
+
+    assert engine.check_file(case_id="ACF-1", path="docs/note.md", operation="write").status == DecisionStatus.ALLOW
+    assert engine.check_file(case_id="ACF-1", path="research/note.md", operation="write").status == DecisionStatus.DENY

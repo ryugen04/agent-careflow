@@ -1,0 +1,1 @@
+policy check-command denied npm install using rules/global command policy; policy check-file denied write while case is in discharge phase.

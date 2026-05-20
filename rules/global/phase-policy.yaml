@@ -1,0 +1,23 @@
+phase_policies:
+  planning:
+    deny_code_write: true
+    allow_write:
+      - ".careflow/cases/*/CASE.yaml"
+      - ".careflow/cases/*/PLAN.md"
+      - ".careflow/cases/*/PLAN.lock.json"
+      - ".careflow/cases/*/orders/**"
+      - "research/**"
+  research:
+    deny_code_write: true
+  implementation:
+    require_active_order: true
+  verification:
+    deny_code_write: true
+    allow_write:
+      - ".careflow/cases/*/evidence/**"
+      - ".careflow/cases/*/results/*verification*.md"
+  review:
+    deny_code_write: true
+    allow_write:
+      - ".careflow/cases/*/reviews/**"
+      - ".careflow/cases/*/results/*review*.md"

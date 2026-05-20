@@ -24,8 +24,15 @@ def normalize_command(command: str) -> str:
         return " ".join(command.split())
 
 
-def check_command(command: str) -> Decision:
+def check_command(command: str, forbidden_commands: list[dict[str, str]] | None = None) -> Decision:
     normalized = normalize_command(command)
+    if forbidden_commands is not None:
+        for rule in forbidden_commands:
+            match = rule.get("match", "")
+            reason = rule.get("reason") or f"{match} is blocked by policy"
+            if match and match in normalized:
+                return deny(reason)
+        return allow("command allowed")
     for pattern, reason in FORBIDDEN_PATTERNS:
         if pattern.search(normalized):
             return deny(reason)

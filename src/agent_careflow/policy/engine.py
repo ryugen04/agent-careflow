@@ -5,6 +5,7 @@ from pathlib import Path
 from agent_careflow.artifacts import ValidationError, case_dir, parse_front_matter_lines, validate_order
 
 from .command_policy import check_command
+from .config import load_policy_config
 from .decisions import Decision, deny
 from .phase_policy import check_phase_file_access
 
@@ -20,6 +21,7 @@ def _list_value(value: object) -> list[str]:
 class PolicyEngine:
     def __init__(self, repo_root: Path) -> None:
         self.repo_root = repo_root
+        self.policy_config = load_policy_config(repo_root)
 
     def case_data(self, case_id: str) -> dict[str, object]:
         path = case_dir(self.repo_root, case_id) / "CASE.yaml"
@@ -28,7 +30,8 @@ class PolicyEngine:
         return parse_front_matter_lines(path.read_text(encoding="utf-8"))
 
     def check_command(self, command: str) -> Decision:
-        return check_command(command)
+        forbidden = self.policy_config.get("forbidden_commands")
+        return check_command(command, forbidden if isinstance(forbidden, list) else None)
 
     def check_file(self, *, case_id: str, path: str, operation: str, order_id: str | None = None) -> Decision:
         data = self.case_data(case_id)
@@ -49,4 +52,5 @@ class PolicyEngine:
             operation=operation,
             allowed_scope=allowed_scope,
             has_active_order=has_active_order,
+            phase_policies=self.policy_config.get("phase_policies") if isinstance(self.policy_config.get("phase_policies"), dict) else None,
         )

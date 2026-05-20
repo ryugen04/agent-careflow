@@ -82,6 +82,12 @@ PYTHONPATH=src python -m agent_careflow.cli result validate --case ACF-BOOTSTRAP
 
 Policy checks:
 
+
+Policy behavior is configured from `rules/global/*.yaml` when those files exist. The Python defaults remain as fallback, but command and phase policy should be changed in:
+
+- `rules/global/command-policy.yaml`
+- `rules/global/phase-policy.yaml`
+
 ```bash
 PYTHONPATH=src python -m agent_careflow.cli policy check-file --case ACF-BOOTSTRAP --path src/app.py --operation write
 PYTHONPATH=src python -m agent_careflow.cli policy check-command --command "git reset --hard HEAD"
