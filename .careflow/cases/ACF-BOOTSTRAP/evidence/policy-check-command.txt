@@ -1,0 +1,1 @@
+PYTHONPATH=src python -m agent_careflow.cli policy check-command --command "git reset --hard HEAD": deny: git reset --hard is blocked by policy

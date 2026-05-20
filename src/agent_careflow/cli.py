@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .artifacts import ValidationError, case_dir, validate_case, validate_discharge, validate_order, validate_plan, validate_research
 from .constants import CASES_DIR, RISK_CLASSES
+from .policy.engine import PolicyEngine
 from .research import scaffold_research
 from .templates import render_case, render_discharge, render_plan
 
@@ -96,6 +97,26 @@ def cmd_init(args: argparse.Namespace) -> int:
     return ok("agent-careflow repository initialized")
 
 
+def cmd_policy_check_file(args: argparse.Namespace) -> int:
+    try:
+        decision = PolicyEngine(Path.cwd()).check_file(
+            case_id=args.case,
+            path=args.path,
+            operation=args.operation,
+            order_id=args.order,
+        )
+    except ValidationError as exc:
+        return fail(exc)
+    print(f"{decision.status.value}: {decision.reason}")
+    return 0 if decision.allowed else 1
+
+
+def cmd_policy_check_command(args: argparse.Namespace) -> int:
+    decision = PolicyEngine(Path.cwd()).check_command(args.command_text)
+    print(f"{decision.status.value}: {decision.reason}")
+    return 0 if decision.allowed else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="agent-careflow")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -136,6 +157,18 @@ def build_parser() -> argparse.ArgumentParser:
     discharge_validate = discharge_sub.add_parser("validate")
     discharge_validate.add_argument("--case", required=True)
     discharge_validate.set_defaults(func=cmd_discharge_validate)
+
+    policy = sub.add_parser("policy")
+    policy_sub = policy.add_subparsers(dest="policy_command", required=True)
+    check_file = policy_sub.add_parser("check-file")
+    check_file.add_argument("--case", required=True)
+    check_file.add_argument("--path", required=True)
+    check_file.add_argument("--operation", choices=["read", "write"], required=True)
+    check_file.add_argument("--order")
+    check_file.set_defaults(func=cmd_policy_check_file)
+    check_command = policy_sub.add_parser("check-command")
+    check_command.add_argument("--command", dest="command_text", required=True)
+    check_command.set_defaults(func=cmd_policy_check_command)
 
     return parser
 

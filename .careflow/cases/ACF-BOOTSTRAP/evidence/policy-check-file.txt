@@ -1,0 +1,1 @@
+PYTHONPATH=src python -m agent_careflow.cli policy check-file --case ACF-BOOTSTRAP --path src/agent_careflow/cli.py --operation write: deny: planning phase cannot write code paths

@@ -60,6 +60,13 @@ PYTHONPATH=src python -m agent_careflow.cli discharge validate --case ACF-BOOTST
 
 If installed as a package, the console command is `agent-careflow`.
 
+Policy checks are available for the Milestone 2 gate model:
+
+```bash
+PYTHONPATH=src python -m agent_careflow.cli policy check-file --case ACF-BOOTSTRAP --path src/app.py --operation write
+PYTHONPATH=src python -m agent_careflow.cli policy check-command --command "git reset --hard HEAD"
+```
+
 ## Milestone status
 
 Implemented in this initial pass:
