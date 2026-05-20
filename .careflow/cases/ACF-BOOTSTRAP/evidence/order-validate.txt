@@ -1,0 +1,1 @@
+PYTHONPATH=src python -m agent_careflow.cli order validate --case ACF-BOOTSTRAP --order ORD-001-research: order valid

@@ -1,0 +1,1 @@
+PYTHONPATH=src python -m agent_careflow.cli plan validate --case ACF-BOOTSTRAP: plan valid

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent-careflow CASE",
+  "type": "object",
+  "required": ["case_id", "title", "risk", "phase", "status", "created_at", "owner"],
+  "properties": {
+    "case_id": {"type": "string"},
+    "title": {"type": "string"},
+    "risk": {"enum": ["C0", "C1", "C2", "C3", "C4"]},
+    "phase": {"type": "string"},
+    "status": {"type": "string"},
+    "created_at": {"type": "string"},
+    "owner": {"type": "string"}
+  }
+}

@@ -1,0 +1,1 @@
+PYTHONPATH=src python -m agent_careflow.cli research validate: research valid

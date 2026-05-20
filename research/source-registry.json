@@ -1,0 +1,12 @@
+{
+  "sources": [
+    {"id": "ahrq-teamstepps-sbar", "title": "AHRQ TeamSTEPPS SBAR", "url": "https://www.ahrq.gov/teamstepps-program/curriculum/communication/tools/sbar.html", "authority": "A", "type": "official docs"},
+    {"id": "ahrq-psnet-handoffs", "title": "AHRQ PSNet Handoffs", "url": "https://psnet.ahrq.gov/primer/handoffs", "authority": "A", "type": "official primer"},
+    {"id": "who-incident-reporting", "title": "WHO Patient Safety Incident Reporting and Learning Systems", "url": "https://www.who.int/publications/i/item/9789240010338", "authority": "A", "type": "official publication"},
+    {"id": "takt", "title": "nrslib/takt", "url": "https://github.com/nrslib/takt", "authority": "B", "type": "official repository"},
+    {"id": "codex-hooks", "title": "Codex hooks", "url": "https://developers.openai.com/codex/hooks", "authority": "A", "type": "official docs"},
+    {"id": "claude-hooks", "title": "Claude Code hooks", "url": "https://code.claude.com/docs/en/hooks", "authority": "A", "type": "official docs"},
+    {"id": "cursor-hooks", "title": "Cursor hooks", "url": "https://cursor.com/docs/hooks", "authority": "A", "type": "official docs"},
+    {"id": "cursor-composer-25", "title": "Cursor Composer 2.5", "url": "https://cursor.com/blog/composer-2-5", "authority": "A", "type": "official blog"}
+  ]
+}
