@@ -35,7 +35,7 @@ owner: codex
 
 ## Non-goals
 
-- Not specified.
+- No non-goals recorded yet.
 
 ## Acceptance criteria
 
@@ -121,17 +121,17 @@ evidence:
 
 ## Summary
 
-Pending.
+Evidence has not been recorded yet.
 
 ## Verification
 
-Pending.
+Verification evidence is required before closure.
 
 ## Open incidents
 
-Pending.
+No incident review has been recorded yet.
 
 ## Final disposition
 
-Pending.
+Not ready for closure.
 """

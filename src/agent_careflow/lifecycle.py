@@ -115,7 +115,7 @@ def new_incident(root: Path, case_id: str, trigger: str) -> Path:
     path = incidents / f"{incident_id}.md"
     now = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
     path.write_text(
-        f"""# INCIDENT: {incident_id}\n\nincident_id: {incident_id}\ncase_id: {case_id}\ntrigger: {trigger}\nstatus: open\ncreated_at: {now}\nseverity: medium\n\n## Summary\n\nPending triage.\n\n## Corrective action\n\nPending.\n""",
+        f"""# INCIDENT: {incident_id}\n\nincident_id: {incident_id}\ncase_id: {case_id}\ntrigger: {trigger}\nstatus: open\ncreated_at: {now}\nseverity: medium\n\n## Summary\n\nTriage required.\n\n## Corrective action\n\nCorrective action required.\n""",
         encoding="utf-8",
     )
     return path

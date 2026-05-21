@@ -10,7 +10,7 @@ status: complete
 ## Decisions
 
 - Proceeded with Milestone 0 and Milestone 1 only.
-- Kept Claude, Cursor, Codex hook adapters, and policy engine work deferred.
+- Initial implementation started with adapters and policy engine deferred; later commits completed those v0.1 surfaces.
 - Recorded research reports as draft stubs with source authority levels.
 - Did not launch subagents because explicit delegation was not requested by the user in this session.
 

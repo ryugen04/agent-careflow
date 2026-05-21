@@ -1,0 +1,1 @@
+Removed stale deferred/placeholder wording from templates.py, lifecycle incident scaffold, and bootstrap conference note.
