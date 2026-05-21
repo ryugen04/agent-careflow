@@ -1,0 +1,1 @@
+Added docs/design.md and examples/v0.1-demo-flow.md. README was rewritten to foreground lifecycle and design philosophy over feature catalog.
