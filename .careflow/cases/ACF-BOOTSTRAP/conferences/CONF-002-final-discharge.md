@@ -18,8 +18,8 @@ Milestones 0 through 8 are implemented and verified for the initial pass.
 ## Residual risks
 
 - Vendor hook schemas need local runtime fixture capture before production enforcement.
-- JSON Schemas are placeholders for several artifact types and should be tightened.
-- Signed plan locks and tamper detection are deferred.
+- Live vendor hook payload capture remains environment-dependent.
+- Plan locks are hash locks; cryptographic signatures require a key-management decision.
 
 ## Disposition
 

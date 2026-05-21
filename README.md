@@ -64,8 +64,13 @@ The validator rejects orders that omit the plan path or reference a stale plan h
 
 Run from the repository root during local development with `PYTHONPATH=src`, or install the package and use the `agent-careflow` console script.
 
-Core validation:
+One-shot repository health check:
 
+```bash
+PYTHONPATH=src python -m agent_careflow.cli doctor
+```
+
+Core validation:
 
 Plan locks bind ORDER execution to the exact PLAN content:
 
@@ -165,21 +170,25 @@ PYTHONPATH=src python -m agent_careflow.cli takt analyze --workflow path/to/work
 
 ## Implemented scope
 
-Implemented through Milestone 8:
+v0.1 is handoff-ready for local control-repository use:
 
 - research scaffold, source registry, and validation
-- CASE, PLAN, ORDER, RESULT, INCIDENT, REVIEW, CONFERENCE, and DISCHARGE artifact validation surface
-- case creation, phase status/advance, order issue/prompt/status, result/review validation, and incident creation
-- policy engine for phase/file/command gates
+- concrete artifact templates and runtime schema validation
+- CASE, PLAN, PLAN.lock, ORDER, RESULT, INCIDENT, REVIEW, CONFERENCE, and DISCHARGE validation surface
+- `doctor` one-shot repository health check
+- case creation, phase status/advance, order issue/prompt/status, result/review validation, incident creation, and close/discharge validation
+- YAML-backed policy engine for phase/file/command gates
+- prompt guard for likely secrets and PHI-like identifiers before agent context entry
 - Codex, Claude, and Cursor hook adapter entrypoints with fixtures
+- hook payload capture command using `codex.runtime_probe.v1` JSONL
 - target repository bootstrap profiles, including private profile without Claude
 - isolation planning with worktree as default
 - TAKT comparative analysis mode
 - focused unit and fixture tests
 
-Deferred beyond this pass:
+Known external blockers and backlog:
 
-- executing worktree/shared clone creation directly
-- signed plan locks and stronger tamper detection
-- deeper semantic JSON Schema coverage for cross-file relationships
-- local runtime fixture capture for every vendor hook version
+- live Codex hook payload capture is inconclusive in this environment because repo-local hooks did not emit capture logs under `codex exec`, and temporary `CODEX_HOME` lacks auth
+- Claude and Cursor live runtime payload capture still requires those tools to be available locally
+- executing worktree/shared clone creation is intentionally still plan-only because cleanup can be destructive
+- cryptographic signatures for plan locks are not enabled until a key-management decision exists; current locks are deterministic hash locks
