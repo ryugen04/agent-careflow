@@ -1,0 +1,1 @@
+UserPromptSubmit prompt guard denied PHI-like MRN fixture with continue=false JSON.

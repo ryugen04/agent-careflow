@@ -1,37 +1,47 @@
 {
   "hooks": {
-  "PreToolUse": [
-    {
-      "matcher": "Bash|apply_patch|.*",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "agent-careflow hook codex pre-tool-use --on-missing-context warn"
-        }
-      ]
-    }
-  ],
-  "PermissionRequest": [
-    {
-      "matcher": "Bash|apply_patch|.*",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "agent-careflow hook codex permission-request --on-missing-context deny"
-        }
-      ]
-    }
-  ],
-  "PostToolUse": [
-    {
-      "matcher": "Bash|apply_patch|.*",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "agent-careflow hook codex post-tool-use --on-missing-context warn"
-        }
-      ]
-    }
-  ]
-}
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "command": "agent-careflow hook codex permission-request --on-missing-context deny",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|apply_patch|.*"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "agent-careflow hook codex post-tool-use --on-missing-context warn",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|apply_patch|.*"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "agent-careflow hook codex pre-tool-use --on-missing-context warn",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|apply_patch|.*"
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "agent-careflow hook codex user-prompt-submit",
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
 }

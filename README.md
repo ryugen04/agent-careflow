@@ -111,6 +111,16 @@ PYTHONPATH=src python -m agent_careflow.cli policy check-command --command "git 
 Hook adapters:
 
 
+Prompt guard hooks can block likely secrets or PHI-like identifiers before they enter AI coding-agent context:
+
+```bash
+printf '{"prompt":"debug patient MRN: ABC123456"}' | \
+  PYTHONPATH=src python -m agent_careflow.cli hook codex user-prompt-submit
+```
+
+This is an engineering guardrail for agent input hygiene; it does not perform clinical classification.
+
+
 Hook payload capture can be used as a sidecar runtime probe:
 
 ```bash

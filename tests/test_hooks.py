@@ -76,3 +76,32 @@ def test_hook_capture_rejects_unknown_event(tmp_path: Path) -> None:
         assert "unsupported probe event" in str(exc)
     else:
         raise AssertionError("expected ValidationError")
+
+
+
+def test_codex_user_prompt_submit_blocks_secret() -> None:
+    from agent_careflow.hooks.common import evaluate_user_prompt_submit
+
+    decision = evaluate_user_prompt_submit({"prompt": "please use api_key=sk-abcdefghijklmnopqrstuvwxyz123456"})
+    rendered = json.loads(codex.render_user_prompt_submit(decision))
+
+    assert rendered["continue"] is False
+    assert "API key" in rendered["stopReason"]
+
+
+def test_codex_user_prompt_submit_blocks_phi_like_identifier() -> None:
+    from agent_careflow.hooks.common import evaluate_user_prompt_submit
+
+    decision = evaluate_user_prompt_submit({"prompt": "debug patient MRN: ABC123456 in this fixture"})
+    rendered = json.loads(codex.render_user_prompt_submit(decision))
+
+    assert rendered["continue"] is False
+    assert "medical record" in rendered["stopReason"]
+
+
+def test_codex_user_prompt_submit_allows_benign_prompt() -> None:
+    from agent_careflow.hooks.common import evaluate_user_prompt_submit
+
+    decision = evaluate_user_prompt_submit({"prompt": "refactor the validator tests"})
+
+    assert codex.render_user_prompt_submit(decision) == "{}"

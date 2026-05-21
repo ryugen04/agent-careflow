@@ -48,3 +48,12 @@ def render_post_tool_use(decision: Decision) -> str:
             }
         )
     return "{}"
+
+
+
+def render_user_prompt_submit(decision: Decision) -> str:
+    if decision.status == DecisionStatus.DENY:
+        return dumps({"continue": False, "stopReason": decision.reason, "systemMessage": decision.reason})
+    if decision.status == DecisionStatus.WARN:
+        return dumps({"systemMessage": decision.reason})
+    return "{}"

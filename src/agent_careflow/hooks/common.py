@@ -8,6 +8,7 @@ from typing import Any
 from agent_careflow.artifacts import ValidationError
 from agent_careflow.policy.decisions import Decision, DecisionStatus, allow, deny, warn
 from agent_careflow.policy.engine import PolicyEngine
+from agent_careflow.policy.prompt_policy import check_prompt_text, extract_prompt_text
 
 
 @dataclass(frozen=True)
@@ -89,6 +90,10 @@ def evaluate_pre_tool_use(payload: dict[str, Any], *, on_missing_context: str = 
 
 def evaluate_permission_request(payload: dict[str, Any], *, on_missing_context: str = "warn") -> Decision:
     return evaluate_pre_tool_use(payload, on_missing_context=on_missing_context)
+
+
+def evaluate_user_prompt_submit(payload: dict[str, Any]) -> Decision:
+    return check_prompt_text(extract_prompt_text(payload))
 
 
 def dumps(data: dict[str, Any]) -> str:

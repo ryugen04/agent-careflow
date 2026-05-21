@@ -7,7 +7,7 @@ from pathlib import Path
 from .artifacts import ValidationError, case_dir, sha256_file, validate_case, validate_discharge, validate_order, validate_plan, validate_research, write_plan_lock
 from .constants import CASES_DIR, RISK_CLASSES
 from .policy.engine import PolicyEngine
-from .hooks.common import evaluate_permission_request, evaluate_pre_tool_use, load_payload
+from .hooks.common import evaluate_permission_request, evaluate_pre_tool_use, evaluate_user_prompt_submit, load_payload
 from .hooks.capture import append_capture_record
 from .hooks import claude as claude_hooks
 from .hooks import codex as codex_hooks
@@ -266,6 +266,8 @@ def cmd_hook(args: argparse.Namespace) -> int:
         payload = load_payload(sys.stdin.read())
         if args.event == "permission-request":
             decision = evaluate_permission_request(payload, on_missing_context=args.on_missing_context)
+        elif args.event == "user-prompt-submit":
+            decision = evaluate_user_prompt_submit(payload)
         else:
             decision = evaluate_pre_tool_use(payload, on_missing_context=args.on_missing_context)
     except ValidationError as exc:
@@ -274,6 +276,8 @@ def cmd_hook(args: argparse.Namespace) -> int:
     if args.tool == "codex":
         if args.event == "permission-request":
             print(codex_hooks.render_permission_request(decision))
+        elif args.event == "user-prompt-submit":
+            print(codex_hooks.render_user_prompt_submit(decision))
         elif args.event == "post-tool-use":
             print(codex_hooks.render_post_tool_use(decision))
         else:
@@ -439,7 +443,7 @@ def build_parser() -> argparse.ArgumentParser:
         event_sub = tool_parser.add_subparsers(dest="event", required=True)
         events = ["pre-tool-use", "post-tool-use"]
         if tool_name == "codex":
-            events.append("permission-request")
+            events.extend(["permission-request", "user-prompt-submit"])
         for event_name in events:
             event_parser = event_sub.add_parser(event_name)
             event_parser.add_argument("--on-missing-context", choices=["warn", "deny"], default="warn")
