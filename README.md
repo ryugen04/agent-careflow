@@ -8,6 +8,7 @@ Read the design first:
 
 - [Design Philosophy](docs/design.md)
 - [v0.1 Demo Flow](examples/v0.1-demo-flow.md)
+- [Dotfiles Distribution Design](docs/dotfiles-distribution.md)
 
 ## Core Idea
 
