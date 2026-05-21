@@ -1,0 +1,1 @@
+Live Codex hook probe was inconclusive. Project-local hooks produced no capture log in codex exec; temporary CODEX_HOME user hooks failed due to missing auth. Probe log: .codex/probes/2026-05-21-live-codex-hook-probe/runtime-probe.jsonl. Codex hooks template was corrected to top-level hooks shape.

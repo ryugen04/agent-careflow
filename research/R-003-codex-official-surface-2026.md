@@ -49,3 +49,7 @@ Codex hook adapters are implemented as thin wrappers around the shared CLI polic
 ## Runtime probe 2026-05-21
 
 runtime-observed: `codex --version` reports `codex-cli 0.131.0`. `codex --help` and `codex --profile codex-config-edit --help` complete successfully. Local adapter renderer probes for Codex `PreToolUse` and `PermissionRequest` produce deny JSON for dangerous command fixtures, and the probe log validates as `codex.runtime_probe.v1`. This does not yet prove live Codex hook event payload shape from an interactive session; that remains a separate fixture-capture task.
+
+## Runtime probe 2026-05-21 live hook attempt
+
+runtime-observed: project-local `.codex/hooks.json` did not produce a capture log during `codex exec` in a temporary repo, even with `--dangerously-bypass-hook-trust`; the command itself completed but the requested Bash command failed under this environment's bubblewrap limitation. A second attempt using a temporary `CODEX_HOME` with user-level `hooks.json` failed with 401 because auth was not present in that temporary home. The live payload capture remains inconclusive. The Codex hooks template was corrected to match the official top-level `{ "hooks": { ... } }` config shape documented by OpenAI.

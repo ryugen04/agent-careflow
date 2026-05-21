@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 
 import pytest
 
@@ -15,6 +16,9 @@ def test_business_profile_writes_all_tool_configs(tmp_path: Path) -> None:
 
     assert target / ".careflow" / "careflow.yaml" in written
     assert (target / ".codex" / "hooks.json").exists()
+    codex_hooks = json.loads((target / ".codex" / "hooks.json").read_text(encoding="utf-8"))
+    assert "hooks" in codex_hooks
+    assert "PreToolUse" in codex_hooks["hooks"]
     assert (target / ".claude" / "settings.json").exists()
     assert (target / ".cursor" / "hooks.json").exists()
     assert "claude: true" in (target / ".careflow" / "careflow.yaml").read_text(encoding="utf-8")
