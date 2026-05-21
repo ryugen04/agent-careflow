@@ -19,6 +19,7 @@ from .lifecycle import advance_phase, case_status, issue_order, new_incident, va
 from .orders import order_status, render_order_prompt
 from .isolation import plan_isolation, render_isolation_plan
 from .takt import analyze_takt_workflow, render_takt_analysis
+from .doctor import doctor_failed, render_doctor, run_doctor
 
 
 def ok(message: str) -> int:
@@ -29,6 +30,12 @@ def ok(message: str) -> int:
 def fail(error: Exception | str) -> int:
     print(f"error: {error}", file=sys.stderr)
     return 1
+
+
+def cmd_doctor(args: argparse.Namespace) -> int:
+    checks = run_doctor(Path.cwd())
+    print(render_doctor(checks))
+    return 1 if doctor_failed(checks) else 0
 
 
 def cmd_research_scaffold(args: argparse.Namespace) -> int:
@@ -301,6 +308,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     init = sub.add_parser("init")
     init.set_defaults(func=cmd_init)
+
+    doctor = sub.add_parser("doctor")
+    doctor.set_defaults(func=cmd_doctor)
 
     bootstrap = sub.add_parser("bootstrap")
     bootstrap.add_argument("--target", default=".")

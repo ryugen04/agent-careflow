@@ -1,0 +1,1 @@
+PYTHONPATH=src python -m agent_careflow.cli doctor passed for research, schemas, Codex hooks, Bootstrap CASE/PLAN/ORDER/DISCHARGE.
