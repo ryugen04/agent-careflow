@@ -5,14 +5,7 @@ from pathlib import Path
 
 from agent_careflow.artifacts import ValidationError
 
-from .profiles import Profile, load_profile
-
-
-def copy_text(src: Path, dst: Path) -> None:
-    if not src.exists():
-        raise ValidationError(f"missing template source: {src}")
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    dst.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
+from .profiles import load_profile
 
 
 def bootstrap_target_repo(*, target: Path, control_repo: Path, profile_name: str) -> list[Path]:
@@ -43,16 +36,4 @@ def bootstrap_target_repo(*, target: Path, control_repo: Path, profile_name: str
     state_json = careflow_dir / "state.json"
     state_json.write_text(json.dumps({"active_case": None, "phase": "intake"}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     written.append(state_json)
-    if profile.codex:
-        dst = target / ".codex" / "hooks.json"
-        copy_text(control_repo / "rules" / "codex" / "hooks.json", dst)
-        written.append(dst)
-    if profile.claude:
-        dst = target / ".claude" / "settings.json"
-        copy_text(control_repo / "rules" / "claude" / "settings.json", dst)
-        written.append(dst)
-    if profile.cursor:
-        dst = target / ".cursor" / "hooks.json"
-        copy_text(control_repo / "rules" / "cursor" / "hooks.json", dst)
-        written.append(dst)
     return written

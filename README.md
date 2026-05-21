@@ -36,7 +36,7 @@ The central repo owns static controls:
 - research reports and source registry
 - profile and bootstrap definitions
 
-Target repositories own runtime artifacts only under `.careflow/`.
+Target repositories own runtime artifacts only under `.careflow/`. Tool-specific files such as `.codex/`, `.claude/`, and `.cursor/` are installed or linked by the user's global environment, not copied into each target repo.
 
 ## PLAN and ORDER
 
@@ -130,7 +130,7 @@ v0.1 is handoff-ready for local control-repository use:
 - prompt guard for likely secrets and PHI-like identifiers before agent context entry
 - Codex, Claude, and Cursor hook adapter entrypoints with fixtures
 - hook payload capture command using `codex.runtime_probe.v1` JSONL
-- target repository bootstrap profiles, including private profile without Claude
+- target repository bootstrap profiles that record tool intent while writing only `.careflow/` runtime files
 - isolation planning with worktree as default
 - TAKT comparative analysis mode
 - focused unit and fixture tests
