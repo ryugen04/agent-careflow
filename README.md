@@ -2,7 +2,7 @@
 
 `agent-careflow` is a control repository for AI coding-agent workflows. It does not replace Codex, Claude Code, Cursor, or TAKT. It provides artifact protocols, validators, policy checks, hook adapters, profile bootstrap, and comparison tools that keep those agents working against the same case record.
 
-This project borrows workflow structure from healthcare operations: cases, plans, orders, handoffs, incidents, reviews, and discharge checks. It is not a medical system and does not provide clinical safety functionality.
+This project intentionally borrows mature workflow-control patterns from healthcare operations: cases, plans, orders, handoffs, incidents, reviews, and discharge checks. The target is engineering use of AI coding agents, not clinical care. The medical analogy is a governance model for planning, delegation, evidence, escalation, and closure.
 
 
 ## Quickstart

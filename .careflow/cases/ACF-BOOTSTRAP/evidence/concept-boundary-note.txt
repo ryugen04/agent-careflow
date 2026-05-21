@@ -1,0 +1,1 @@
+README and R-001 clarify that healthcare workflow is a governance metaphor for engineering use of AI coding agents, not AI inside clinical care.

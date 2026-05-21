@@ -41,3 +41,7 @@ Use `case`, `order`, `incident`, and `discharge` in CLI commands with a README d
 ## References to add to PLAN
 
 R-001 should inform ORDER, RESULT, INCIDENT, and DISCHARGE templates.
+
+## Concept boundary
+
+agent-careflow is not about deploying AI agents inside clinical operations. It uses healthcare workflow knowledge as a mature control pattern for software engineers who operate AI coding agents. The transferable elements are structured planning, bounded orders, handoff discipline, incident reporting, evidence requirements, multidisciplinary review, and explicit closure. Clinical diagnosis, patient care, and medical decision support are outside scope.
