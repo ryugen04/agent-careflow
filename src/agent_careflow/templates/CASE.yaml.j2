@@ -1,3 +1,10 @@
-# CASE.yaml.j2
-
-Template placeholder for agent-careflow v0.1.
+case_id: {{ case_id }}
+title: {{ title }}
+risk: {{ risk }}
+phase: intake
+status: active
+created_at: {{ created_at }}
+owner: {{ owner }}
+allowed_scope:
+  - .careflow/**
+summary: {{ summary }}

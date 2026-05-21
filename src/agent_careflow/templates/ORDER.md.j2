@@ -1,3 +1,32 @@
-# ORDER.md.j2
+# ORDER: {{ order_id }}
 
-Template placeholder for agent-careflow v0.1.
+order_id: {{ order_id }}
+case_id: {{ case_id }}
+assigned_role: {{ assigned_role }}
+plan_path: {{ plan_path }}
+plan_hash: {{ plan_hash }}
+allowed_actions:
+  - {{ allowed_action }}
+forbidden_actions:
+  - edit outside allowed scope
+deliverables:
+  - {{ expected_result_path }}
+expected_result_path: {{ expected_result_path }}
+completion_criteria:
+  - expected result exists
+
+## Situation
+
+{{ situation }}
+
+## Background
+
+See PLAN.md.
+
+## Assessment
+
+{{ assessment }}
+
+## Recommendation
+
+{{ recommendation }}
