@@ -87,3 +87,13 @@ status: pass
 
     validate_result(result)
     validate_review(review)
+
+
+
+def test_close_validate_alias_uses_discharge_validator(tmp_path: Path, monkeypatch) -> None:
+    from agent_careflow.cli import main
+
+    make_case(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    assert main(["close", "validate", "--case", "ACF-1"]) == 1

@@ -74,13 +74,14 @@ PYTHONPATH=src python -m agent_careflow.cli hash plan --case ACF-BOOTSTRAP --wri
 PYTHONPATH=src python -m agent_careflow.cli plan validate --case ACF-BOOTSTRAP --require-lock
 ```
 
-When `PLAN.lock.json` exists, ORDER validation checks that `plan_hash` matches both `PLAN.md` and the lock file. Runtime validators read the bundled schema files for required fields, enum values, const values, simple types, and hash patterns.
+When `PLAN.lock.json` exists, ORDER validation checks that `plan_hash` matches both `PLAN.md` and the lock file. `close validate` is a technical alias for `discharge validate`; the artifact remains `DISCHARGE.md` to preserve the careflow metaphor. Runtime validators read the bundled schema files for required fields, enum values, const values, simple types, and hash patterns.
 
 ```bash
 PYTHONPATH=src python -m agent_careflow.cli research validate
 PYTHONPATH=src python -m agent_careflow.cli plan validate --case ACF-BOOTSTRAP
 PYTHONPATH=src python -m agent_careflow.cli order validate --case ACF-BOOTSTRAP --order ORD-001-research
 PYTHONPATH=src python -m agent_careflow.cli discharge validate --case ACF-BOOTSTRAP
+PYTHONPATH=src python -m agent_careflow.cli close validate --case ACF-BOOTSTRAP
 ```
 
 Case lifecycle:

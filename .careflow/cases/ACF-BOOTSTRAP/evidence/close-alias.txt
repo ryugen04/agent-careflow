@@ -1,0 +1,1 @@
+Added close validate as a technical alias for discharge validate while preserving DISCHARGE.md artifact semantics.

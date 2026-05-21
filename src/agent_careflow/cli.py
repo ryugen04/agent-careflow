@@ -113,6 +113,10 @@ def cmd_discharge_validate(args: argparse.Namespace) -> int:
     return ok(f"discharge valid: {path}")
 
 
+def cmd_close_validate(args: argparse.Namespace) -> int:
+    return cmd_discharge_validate(args)
+
+
 def cmd_phase_status(args: argparse.Namespace) -> int:
     try:
         status = case_status(Path.cwd(), args.case)
@@ -386,6 +390,12 @@ def build_parser() -> argparse.ArgumentParser:
     discharge_validate = discharge_sub.add_parser("validate")
     discharge_validate.add_argument("--case", required=True)
     discharge_validate.set_defaults(func=cmd_discharge_validate)
+
+    close = sub.add_parser("close")
+    close_sub = close.add_subparsers(dest="close_command", required=True)
+    close_validate = close_sub.add_parser("validate")
+    close_validate.add_argument("--case", required=True)
+    close_validate.set_defaults(func=cmd_close_validate)
 
     policy = sub.add_parser("policy")
     policy_sub = policy.add_subparsers(dest="policy_command", required=True)
