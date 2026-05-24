@@ -57,3 +57,8 @@ def render_user_prompt_submit(decision: Decision) -> str:
     if decision.status == DecisionStatus.WARN:
         return dumps({"systemMessage": decision.reason})
     return "{}"
+
+def render_stop(decision: Decision) -> str:
+    if decision.status == DecisionStatus.DENY:
+        return dumps({"decision": "block", "reason": decision.reason})
+    return "{}"

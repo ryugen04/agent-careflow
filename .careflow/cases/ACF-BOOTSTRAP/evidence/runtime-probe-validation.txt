@@ -1,0 +1,21 @@
+# Runtime Probe Status
+
+recorded_at: 2026-05-25T00:34:56+09:00
+
+## Tools
+
+- codex: available=yes; version=codex-cli 0.133.0; path=/home/glaucus03/.nvm/versions/node/v22.14.0/bin/codex
+- claude: available=yes; version=2.1.108 (Claude Code); path=/home/glaucus03/.local/bin/claude
+- cursor: available=no; version=unknown; path=not found
+
+## Probe Files
+
+- /home/glaucus03/dev/projects/agent-careflow/.codex/probes/2026-05-21-hook-capture-smoke/runtime-probe.jsonl: valid (1 record(s))
+- /home/glaucus03/dev/projects/agent-careflow/.codex/probes/2026-05-21-hook-runtime/runtime-probe.jsonl: valid (5 record(s))
+- /home/glaucus03/dev/projects/agent-careflow/.codex/probes/2026-05-21-live-codex-hook-probe/runtime-probe.jsonl: valid (2 record(s))
+
+## Live Runtime Capture Attempts
+
+- Codex: attempted controlled `codex exec --enable hooks --dangerously-bypass-hook-trust` runs against `/tmp/agent-careflow-live-codex-probe`; model run succeeded and returned `ok`, but neither project `.codex/hooks.json` nor inline `-c hooks.*` commands produced a capture JSONL file. Status: inconclusive hook dispatch in Codex CLI 0.133.0.
+- Claude: attempted controlled `claude -p --verbose --output-format stream-json --include-hook-events --settings /tmp/agent-careflow-live-claude-probe/settings.json`; runtime emitted stream-json lifecycle data but stopped with authentication failure: `Your organization does not have access to Claude`. No capture JSONL file was produced. Status: blocked by Claude auth/organization access.
+- Cursor: `cursor` is not on PATH. Status: blocked by unavailable local runtime.

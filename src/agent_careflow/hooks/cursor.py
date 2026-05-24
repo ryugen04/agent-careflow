@@ -15,3 +15,6 @@ def render_pre_tool_use(decision: Decision) -> str:
 
 def render_post_tool_use(decision: Decision) -> str:
     return render_pre_tool_use(decision)
+
+def render_stop(decision: Decision) -> str:
+    return render_pre_tool_use(decision)

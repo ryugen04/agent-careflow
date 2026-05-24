@@ -98,3 +98,21 @@ def evaluate_user_prompt_submit(payload: dict[str, Any]) -> Decision:
 
 def dumps(data: dict[str, Any]) -> str:
     return json.dumps(data, sort_keys=True, separators=(",", ":"))
+
+def evaluate_lifecycle_hook(payload: dict[str, Any]) -> Decision:
+    return allow(f"{payload.get('hook_event_name') or 'hook'} accepted")
+
+
+def record_hook_incident(payload: dict[str, Any], decision: Decision, *, trigger: str = "hook_policy_denied") -> Path | None:
+    if decision.status != DecisionStatus.DENY:
+        return None
+    context = hook_context(payload)
+    if not context.case_id:
+        return None
+    from agent_careflow.lifecycle import new_incident
+
+    path = new_incident(context.cwd, context.case_id, trigger)
+    text = path.read_text(encoding="utf-8")
+    text = text.replace("Triage required.", f"Hook policy denied an action: {decision.reason}")
+    path.write_text(text, encoding="utf-8")
+    return path

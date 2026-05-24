@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import subprocess
+import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -46,9 +48,88 @@ def build_plan_lock(plan_path: Path) -> dict[str, object]:
     }
 
 
-def write_plan_lock(plan_path: Path) -> Path:
+SIGNATURE_FIELDS = {"signature", "signature_namespace", "signature_principal", "signature_algorithm"}
+DEFAULT_SIGNATURE_NAMESPACE = "agent-careflow-plan-lock"
+
+
+def canonical_plan_lock_payload(lock: dict[str, object]) -> bytes:
+    payload = {key: value for key, value in lock.items() if key not in SIGNATURE_FIELDS}
+    return (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+
+
+def sign_plan_lock(lock: dict[str, object], *, signing_key: Path, principal: str) -> dict[str, object]:
+    if not signing_key.exists():
+        raise ValidationError(f"signing key not found: {signing_key}")
+    with tempfile.TemporaryDirectory() as tmp:
+        message = Path(tmp) / "PLAN.lock.payload"
+        message.write_bytes(canonical_plan_lock_payload(lock))
+        result = subprocess.run(
+            ["ssh-keygen", "-Y", "sign", "-f", signing_key.as_posix(), "-n", DEFAULT_SIGNATURE_NAMESPACE, message.as_posix()],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        if result.returncode != 0:
+            detail = result.stderr.strip() or result.stdout.strip() or f"exit {result.returncode}"
+            raise ValidationError(f"PLAN lock signing failed: {detail}")
+        signature_path = message.with_suffix(message.suffix + ".sig")
+        if not signature_path.exists():
+            raise ValidationError("PLAN lock signing failed: signature file was not created")
+        signed = dict(lock)
+        signed["signature_algorithm"] = "openssh"
+        signed["signature_namespace"] = DEFAULT_SIGNATURE_NAMESPACE
+        signed["signature_principal"] = principal
+        signed["signature"] = signature_path.read_text(encoding="utf-8")
+        return signed
+
+
+def verify_plan_lock_signature(lock: dict[str, object], lock_path: Path, *, allowed_signers: Path, principal: str | None = None) -> None:
+    for field in ("signature", "signature_namespace", "signature_principal", "signature_algorithm"):
+        if field not in lock or lock[field] in ("", None):
+            raise ValidationError(f"{lock_path}: missing {field}")
+    if lock["signature_algorithm"] != "openssh":
+        raise ValidationError(f"{lock_path}: unsupported signature_algorithm {lock['signature_algorithm']!r}")
+    if lock["signature_namespace"] != DEFAULT_SIGNATURE_NAMESPACE:
+        raise ValidationError(f"{lock_path}: unsupported signature_namespace {lock['signature_namespace']!r}")
+    lock_principal = str(lock["signature_principal"])
+    if principal and lock_principal != principal:
+        raise ValidationError(f"{lock_path}: signature_principal does not match requested principal")
+    if not allowed_signers.exists():
+        raise ValidationError(f"allowed signers file not found: {allowed_signers}")
+    with tempfile.TemporaryDirectory() as tmp:
+        signature_path = Path(tmp) / "PLAN.lock.sig"
+        signature_path.write_text(str(lock["signature"]), encoding="utf-8")
+        result = subprocess.run(
+            [
+                "ssh-keygen",
+                "-Y",
+                "verify",
+                "-f",
+                allowed_signers.as_posix(),
+                "-I",
+                principal or lock_principal,
+                "-n",
+                str(lock["signature_namespace"]),
+                "-s",
+                signature_path.as_posix(),
+            ],
+            input=canonical_plan_lock_payload(lock),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        if result.returncode != 0:
+            detail = result.stderr.decode("utf-8", errors="replace").strip() or result.stdout.decode("utf-8", errors="replace").strip() or f"exit {result.returncode}"
+            raise ValidationError(f"{lock_path}: PLAN lock signature verification failed: {detail}")
+
+
+def write_plan_lock(plan_path: Path, *, signing_key: Path | None = None, signing_principal: str | None = None) -> Path:
     lock_path = plan_lock_path(plan_path)
-    lock_path.write_text(json.dumps(build_plan_lock(plan_path), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    lock = build_plan_lock(plan_path)
+    if signing_key:
+        lock = sign_plan_lock(lock, signing_key=signing_key, principal=signing_principal or "agent-careflow")
+    lock_path.write_text(json.dumps(lock, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return lock_path
 
 
@@ -62,7 +143,7 @@ def read_plan_lock(lock_path: Path) -> dict[str, object]:
     return lock
 
 
-def validate_plan_lock(plan_path: Path, *, required: bool = False) -> None:
+def validate_plan_lock(plan_path: Path, *, required: bool = False, require_signature: bool = False, allowed_signers: Path | None = None, signing_principal: str | None = None) -> None:
     lock_path = plan_lock_path(plan_path)
     if not lock_path.exists():
         if required:
@@ -82,6 +163,10 @@ def validate_plan_lock(plan_path: Path, *, required: bool = False) -> None:
     actual_hash = sha256_file(plan_path)
     if lock["plan_hash"] != actual_hash:
         raise ValidationError(f"{lock_path}: stale plan lock: expected {lock['plan_hash']}, actual {actual_hash}")
+    if require_signature:
+        if not allowed_signers:
+            raise ValidationError("allowed signers file is required for PLAN lock signature verification")
+        verify_plan_lock_signature(lock, lock_path, allowed_signers=allowed_signers, principal=signing_principal)
 
 
 def parse_front_matter_lines(text: str) -> dict[str, object]:
@@ -138,7 +223,7 @@ def validate_case(case_path: Path) -> None:
         raise ValidationError(f"{case_path}: invalid risk class {data['risk']!r}")
 
 
-def validate_plan(plan_path: Path, *, require_lock: bool = False) -> None:
+def validate_plan(plan_path: Path, *, require_lock: bool = False, require_signature: bool = False, allowed_signers: Path | None = None, signing_principal: str | None = None) -> None:
     from .schema_validation import validate_data_against_schema
 
     text = plan_path.read_text(encoding="utf-8")
@@ -161,7 +246,7 @@ def validate_plan(plan_path: Path, *, require_lock: bool = False) -> None:
         raise ValidationError(f"{plan_path}: missing section(s): {', '.join(missing)}")
     if data["risk"] not in RISK_CLASSES:
         raise ValidationError(f"{plan_path}: invalid risk class {data['risk']!r}")
-    validate_plan_lock(plan_path, required=require_lock)
+    validate_plan_lock(plan_path, required=require_lock or require_signature, require_signature=require_signature, allowed_signers=allowed_signers, signing_principal=signing_principal)
 
 
 def validate_order(order_path: Path, repo_root: Path | None = None) -> None:

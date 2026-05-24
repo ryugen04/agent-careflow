@@ -1,24 +1,26 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
 from .artifacts import ValidationError, case_dir, sha256_file, validate_case, validate_discharge, validate_order, validate_plan, validate_research, write_plan_lock
 from .constants import CASES_DIR, RISK_CLASSES
 from .policy.engine import PolicyEngine
-from .hooks.common import evaluate_permission_request, evaluate_pre_tool_use, evaluate_user_prompt_submit, load_payload
-from .hooks.capture import append_capture_record
+from .hooks.common import evaluate_lifecycle_hook, evaluate_permission_request, evaluate_pre_tool_use, evaluate_user_prompt_submit, load_payload, record_hook_incident
+from .hooks.capture import append_capture_record, render_runtime_status, runtime_status, validate_capture_file
 from .hooks import claude as claude_hooks
 from .hooks import codex as codex_hooks
 from .hooks import cursor as cursor_hooks
 from .research import scaffold_research
 from .templates import render_case, render_discharge, render_plan
 from .bootstrap.target_repo import bootstrap_target_repo
+from .bootstrap.profiles import install_profile, render_profile, validate_profile
 from .lifecycle import advance_phase, case_status, collect_evidence, issue_order, new_incident, validate_result, validate_review
 from .orders import order_status, render_order_prompt
-from .isolation import plan_isolation, render_isolation_plan
-from .takt import analyze_takt_workflow, render_takt_analysis
+from .isolation import cleanup_isolation, create_isolation, export_isolation_patch, plan_isolation, render_isolation_plan
+from .takt import analyze_takt_workflow, render_takt_analysis, render_takt_import, render_takt_policy_export
 from .doctor import doctor_failed, render_doctor, run_doctor
 
 
@@ -80,7 +82,7 @@ def cmd_case_new(args: argparse.Namespace) -> int:
 def cmd_plan_validate(args: argparse.Namespace) -> int:
     path = case_dir(Path.cwd(), args.case) / "PLAN.md"
     try:
-        validate_plan(path, require_lock=args.require_lock)
+        validate_plan(path, require_lock=args.require_lock, require_signature=args.require_signature, allowed_signers=Path(args.allowed_signers) if args.allowed_signers else None, signing_principal=args.signing_principal)
     except (OSError, ValidationError) as exc:
         return fail(exc)
     return ok(f"plan valid: {path}")
@@ -90,7 +92,7 @@ def cmd_hash_plan(args: argparse.Namespace) -> int:
     path = case_dir(Path.cwd(), args.case) / "PLAN.md"
     try:
         if args.write_lock:
-            lock_path = write_plan_lock(path)
+            lock_path = write_plan_lock(path, signing_key=Path(args.signing_key) if args.signing_key else None, signing_principal=args.signing_principal)
             return ok(f"plan lock written: {lock_path}")
         print(sha256_file(path))
     except (OSError, ValidationError) as exc:
@@ -216,6 +218,32 @@ def cmd_bootstrap(args: argparse.Namespace) -> int:
     return ok(f"bootstrap complete ({len(written)} file(s) written)")
 
 
+def cmd_profile_validate(args: argparse.Namespace) -> int:
+    try:
+        profile = validate_profile(Path.cwd(), args.name)
+    except ValidationError as exc:
+        return fail(exc)
+    enabled = ",".join(tool for tool, is_enabled in {"codex": profile.codex, "claude": profile.claude, "cursor": profile.cursor}.items() if is_enabled)
+    return ok(f"profile valid: {profile.name} tools={enabled}")
+
+
+def cmd_profile_render(args: argparse.Namespace) -> int:
+    try:
+        profile = validate_profile(Path.cwd(), args.name)
+        written = render_profile(Path.cwd(), profile, Path(args.target))
+    except ValidationError as exc:
+        return fail(exc)
+    return ok(f"profile rendered: {len(written)} file(s)")
+
+
+def cmd_install(args: argparse.Namespace) -> int:
+    try:
+        written = install_profile(Path.cwd(), args.profile, Path(args.target).expanduser(), enable=args.enable, disable=args.disable)
+    except ValidationError as exc:
+        return fail(exc)
+    return ok(f"profile installed: {len(written)} file(s)")
+
+
 def cmd_policy_check_file(args: argparse.Namespace) -> int:
     try:
         decision = PolicyEngine(Path.cwd()).check_file(
@@ -245,6 +273,30 @@ def cmd_isolation_plan(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_isolation_create(args: argparse.Namespace) -> int:
+    try:
+        work_dir = create_isolation(target=Path(args.target), case_id=args.case, strategy=args.strategy, base_ref=args.base_ref)
+    except ValidationError as exc:
+        return fail(exc)
+    return ok(f"isolation created: {work_dir}")
+
+
+def cmd_isolation_cleanup(args: argparse.Namespace) -> int:
+    try:
+        work_dir = cleanup_isolation(target=Path(args.target), case_id=args.case, strategy=args.strategy, work_dir=Path(args.work_dir) if args.work_dir else None, force=args.force)
+    except ValidationError as exc:
+        return fail(exc)
+    return ok(f"isolation cleaned: {work_dir}")
+
+
+def cmd_isolation_export_patch(args: argparse.Namespace) -> int:
+    try:
+        output = export_isolation_patch(work_dir=Path(args.work_dir), output=Path(args.output))
+    except ValidationError as exc:
+        return fail(exc)
+    return ok(f"isolation patch written: {output}")
+
+
 def cmd_takt_analyze(args: argparse.Namespace) -> int:
     try:
         report = render_takt_analysis(analyze_takt_workflow(Path(args.workflow)))
@@ -255,6 +307,31 @@ def cmd_takt_analyze(args: argparse.Namespace) -> int:
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(report, encoding="utf-8")
         return ok(f"takt analysis written: {output}")
+    print(report)
+    return 0
+
+
+def cmd_takt_import_workflow(args: argparse.Namespace) -> int:
+    try:
+        report = render_takt_import(Path(args.workflow))
+    except ValidationError as exc:
+        return fail(exc)
+    if args.output:
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(report, encoding="utf-8")
+        return ok(f"takt import written: {output}")
+    print(report)
+    return 0
+
+
+def cmd_takt_export_policy(args: argparse.Namespace) -> int:
+    report = render_takt_policy_export(Path.cwd())
+    if args.output:
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(report, encoding="utf-8")
+        return ok(f"takt policy written: {output}")
     print(report)
     return 0
 
@@ -276,6 +353,26 @@ def cmd_hook_capture(args: argparse.Namespace) -> int:
     return ok(f"hook payload captured: {args.output}")
 
 
+def cmd_hook_probe_validate(args: argparse.Namespace) -> int:
+    try:
+        count = validate_capture_file(Path(args.input))
+    except ValidationError as exc:
+        return fail(exc)
+    return ok(f"probe valid: {args.input} ({count} record(s))")
+
+
+def cmd_hook_runtime_status(args: argparse.Namespace) -> int:
+    status = runtime_status(root=Path.cwd(), probe_files=[Path(path) for path in args.probe] if args.probe else None)
+    rendered = render_runtime_status(status) if args.format == "markdown" else json.dumps(status, indent=2, sort_keys=True) + "\n"
+    if args.output:
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(rendered, encoding="utf-8")
+        return ok(f"runtime status written: {output}")
+    print(rendered, end="")
+    return 0
+
+
 def cmd_hook(args: argparse.Namespace) -> int:
     try:
         payload = load_payload(sys.stdin.read())
@@ -283,8 +380,12 @@ def cmd_hook(args: argparse.Namespace) -> int:
             decision = evaluate_permission_request(payload, on_missing_context=args.on_missing_context)
         elif args.event == "user-prompt-submit":
             decision = evaluate_user_prompt_submit(payload)
+        elif args.event in {"stop", "subagent-start", "subagent-stop"}:
+            decision = evaluate_lifecycle_hook(payload)
         else:
             decision = evaluate_pre_tool_use(payload, on_missing_context=args.on_missing_context)
+        if getattr(args, "incident_on_deny", False):
+            record_hook_incident(payload, decision)
     except ValidationError as exc:
         return fail(exc)
 
@@ -295,16 +396,26 @@ def cmd_hook(args: argparse.Namespace) -> int:
             print(codex_hooks.render_user_prompt_submit(decision))
         elif args.event == "post-tool-use":
             print(codex_hooks.render_post_tool_use(decision))
+        elif args.event == "stop":
+            print(codex_hooks.render_stop(decision))
         else:
             print(codex_hooks.render_pre_tool_use(decision))
     elif args.tool == "claude":
         if args.event == "post-tool-use":
             print(claude_hooks.render_post_tool_use(decision))
+        elif args.event == "stop":
+            print(claude_hooks.render_stop(decision))
+        elif args.event == "subagent-start":
+            print(claude_hooks.render_subagent_start(decision))
+        elif args.event == "subagent-stop":
+            print(claude_hooks.render_subagent_stop(decision))
         else:
             print(claude_hooks.render_pre_tool_use(decision))
     else:
         if args.event == "post-tool-use":
             print(cursor_hooks.render_post_tool_use(decision))
+        elif args.event == "stop":
+            print(cursor_hooks.render_stop(decision))
         else:
             print(cursor_hooks.render_pre_tool_use(decision))
     return 0
@@ -326,6 +437,23 @@ def build_parser() -> argparse.ArgumentParser:
     bootstrap.add_argument("--careflow-repo", default=str(Path.cwd()))
     bootstrap.set_defaults(func=cmd_bootstrap)
 
+    install = sub.add_parser("install")
+    install.add_argument("--profile", required=True)
+    install.add_argument("--target", default="~/.agent-careflow/rendered")
+    install.add_argument("--enable", action="append", choices=["codex", "claude", "cursor"], default=[])
+    install.add_argument("--disable", action="append", choices=["codex", "claude", "cursor"], default=[])
+    install.set_defaults(func=cmd_install)
+
+    profile = sub.add_parser("profile")
+    profile_sub = profile.add_subparsers(dest="profile_command", required=True)
+    profile_validate = profile_sub.add_parser("validate")
+    profile_validate.add_argument("name")
+    profile_validate.set_defaults(func=cmd_profile_validate)
+    profile_render = profile_sub.add_parser("render")
+    profile_render.add_argument("name")
+    profile_render.add_argument("--target", required=True)
+    profile_render.set_defaults(func=cmd_profile_render)
+
     research = sub.add_parser("research")
     research_sub = research.add_subparsers(dest="research_command", required=True)
     research_scaffold = research_sub.add_parser("scaffold")
@@ -346,6 +474,9 @@ def build_parser() -> argparse.ArgumentParser:
     plan_validate = plan_sub.add_parser("validate")
     plan_validate.add_argument("--case", required=True)
     plan_validate.add_argument("--require-lock", action="store_true")
+    plan_validate.add_argument("--require-signature", action="store_true")
+    plan_validate.add_argument("--allowed-signers")
+    plan_validate.add_argument("--signing-principal")
     plan_validate.set_defaults(func=cmd_plan_validate)
 
     hash_cmd = sub.add_parser("hash")
@@ -353,6 +484,8 @@ def build_parser() -> argparse.ArgumentParser:
     hash_plan = hash_sub.add_parser("plan")
     hash_plan.add_argument("--case", required=True)
     hash_plan.add_argument("--write-lock", action="store_true")
+    hash_plan.add_argument("--signing-key")
+    hash_plan.add_argument("--signing-principal")
     hash_plan.set_defaults(func=cmd_hash_plan)
 
     order = sub.add_parser("order")
@@ -446,6 +579,23 @@ def build_parser() -> argparse.ArgumentParser:
     isolation_plan.add_argument("--strategy", choices=["worktree", "shared-clone", "temp-clone"], default="worktree")
     isolation_plan.add_argument("--base-ref", default="HEAD")
     isolation_plan.set_defaults(func=cmd_isolation_plan)
+    isolation_create = isolation_sub.add_parser("create")
+    isolation_create.add_argument("--target", default=".")
+    isolation_create.add_argument("--case", required=True)
+    isolation_create.add_argument("--strategy", choices=["worktree", "shared-clone", "temp-clone"], default="worktree")
+    isolation_create.add_argument("--base-ref", default="HEAD")
+    isolation_create.set_defaults(func=cmd_isolation_create)
+    isolation_cleanup = isolation_sub.add_parser("cleanup")
+    isolation_cleanup.add_argument("--target", default=".")
+    isolation_cleanup.add_argument("--case", required=True)
+    isolation_cleanup.add_argument("--strategy", choices=["worktree", "shared-clone", "temp-clone"], default="worktree")
+    isolation_cleanup.add_argument("--work-dir")
+    isolation_cleanup.add_argument("--force", action="store_true")
+    isolation_cleanup.set_defaults(func=cmd_isolation_cleanup)
+    isolation_export = isolation_sub.add_parser("export-patch")
+    isolation_export.add_argument("--work-dir", required=True)
+    isolation_export.add_argument("--output", required=True)
+    isolation_export.set_defaults(func=cmd_isolation_export_patch)
 
     takt = sub.add_parser("takt")
     takt_sub = takt.add_subparsers(dest="takt_command", required=True)
@@ -453,6 +603,13 @@ def build_parser() -> argparse.ArgumentParser:
     takt_analyze.add_argument("--workflow", required=True)
     takt_analyze.add_argument("--output")
     takt_analyze.set_defaults(func=cmd_takt_analyze)
+    takt_import = takt_sub.add_parser("import-workflow")
+    takt_import.add_argument("--workflow", required=True)
+    takt_import.add_argument("--output")
+    takt_import.set_defaults(func=cmd_takt_import_workflow)
+    takt_export = takt_sub.add_parser("export-policy")
+    takt_export.add_argument("--output")
+    takt_export.set_defaults(func=cmd_takt_export_policy)
 
     hook = sub.add_parser("hook")
     hook_sub = hook.add_subparsers(dest="tool", required=True)
@@ -463,15 +620,26 @@ def build_parser() -> argparse.ArgumentParser:
     capture.add_argument("--verdict", choices=["pass", "fail", "inconclusive"], default="inconclusive")
     capture.add_argument("--notes", default="runtime-observed: captured hook stdin payload")
     capture.set_defaults(func=cmd_hook_capture)
+    probe_validate = hook_sub.add_parser("probe-validate")
+    probe_validate.add_argument("--input", required=True)
+    probe_validate.set_defaults(func=cmd_hook_probe_validate)
+    runtime_status_parser = hook_sub.add_parser("runtime-status")
+    runtime_status_parser.add_argument("--probe", action="append", default=[])
+    runtime_status_parser.add_argument("--format", choices=["json", "markdown"], default="markdown")
+    runtime_status_parser.add_argument("--output")
+    runtime_status_parser.set_defaults(func=cmd_hook_runtime_status)
     for tool_name in ("codex", "claude", "cursor"):
         tool_parser = hook_sub.add_parser(tool_name)
         event_sub = tool_parser.add_subparsers(dest="event", required=True)
-        events = ["pre-tool-use", "post-tool-use"]
+        events = ["pre-tool-use", "post-tool-use", "stop"]
         if tool_name == "codex":
             events.extend(["permission-request", "user-prompt-submit"])
+        if tool_name == "claude":
+            events.extend(["subagent-start", "subagent-stop"])
         for event_name in events:
             event_parser = event_sub.add_parser(event_name)
             event_parser.add_argument("--on-missing-context", choices=["warn", "deny"], default="warn")
+            event_parser.add_argument("--incident-on-deny", action="store_true")
             event_parser.set_defaults(func=cmd_hook)
 
     return parser

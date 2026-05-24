@@ -71,6 +71,7 @@ After installation, the console script is `agent-careflow`. If your shell cannot
 ```bash
 agent-careflow case new --title "Fix auth callback bug" --risk C2
 agent-careflow hash plan --case <case_id> --write-lock
+agent-careflow hash plan --case <case_id> --write-lock --signing-key ~/.ssh/id_ed25519 --signing-principal you@example.com
 agent-careflow plan validate --case <case_id> --require-lock
 agent-careflow order issue --case <case_id> --order ORD-001 --role implementer
 agent-careflow order prompt --case <case_id> --order ORD-001 --tool codex
@@ -90,6 +91,8 @@ agent-careflow doctor
 agent-careflow research validate
 agent-careflow order status --case <case_id> --order ORD-001
 agent-careflow evidence collect --case <case_id> --kind git-status
+agent-careflow profile validate business
+agent-careflow profile render business --target /tmp/agent-careflow-profile
 ```
 
 Policy checks:
@@ -104,6 +107,7 @@ Hook adapters and prompt guard:
 ```bash
 printf '{"prompt":"debug patient MRN: ABC123456"}' | agent-careflow hook codex user-prompt-submit
 agent-careflow hook codex pre-tool-use < tests/fixtures/hooks/codex_pre_tool_use_bash_danger.json
+agent-careflow hook runtime-status --format markdown --output .careflow/cases/<case_id>/evidence/runtime-probe-validation.txt
 ```
 
 Bootstrap and planning support:
@@ -111,7 +115,11 @@ Bootstrap and planning support:
 ```bash
 agent-careflow bootstrap --target /path/to/target --profile private --careflow-repo /path/to/agent-careflow
 agent-careflow isolation plan --target . --case <case_id> --strategy worktree
+agent-careflow isolation create --target . --case <case_id> --strategy worktree
+agent-careflow isolation export-patch --work-dir /path/to/worktree --output /tmp/change.patch
 agent-careflow takt analyze --workflow path/to/workflow.yaml
+agent-careflow takt import-workflow --workflow path/to/workflow.yaml
+agent-careflow takt export-policy --output /tmp/takt-policy.yaml
 ```
 
 Policy behavior is configured from `rules/global/*.yaml` when those files exist. The Python defaults remain as fallback, but command and phase policy should be changed in:
@@ -130,16 +138,16 @@ v0.1 is handoff-ready for local control-repository use:
 - case creation, phase status/advance, order issue/prompt/status, evidence collection, result/review validation, incident creation, and close/discharge validation
 - YAML-backed policy engine for phase/file/command gates
 - prompt guard for likely secrets and PHI-like identifiers before agent context entry
-- Codex, Claude, and Cursor hook adapter entrypoints with fixtures
-- hook payload capture command using `codex.runtime_probe.v1` JSONL
+- Codex, Claude, and Cursor hook adapter entrypoints with fixtures, Stop hooks, and opt-in incident creation on deny
+- hook payload capture and validation commands using `codex.runtime_probe.v1` JSONL
 - target repository bootstrap profiles that record tool intent while writing only `.careflow/` runtime files
-- isolation planning with worktree as default
-- TAKT comparative analysis mode
+- profile validate/render/install support for rendered tool configs
+- isolation planning and guarded worktree/clone execution with patch export
+- TAKT comparative analysis plus import/export reports
 - focused unit and fixture tests
 
 Known external blockers and backlog:
 
 - live Codex hook payload capture is inconclusive in this environment because repo-local hooks did not emit capture logs under `codex exec`, and temporary `CODEX_HOME` lacks auth
-- Claude and Cursor live runtime payload capture still requires those tools to be available locally
-- executing worktree/shared clone creation is intentionally still plan-only because cleanup can be destructive
-- cryptographic signatures for plan locks are not enabled until a key-management decision exists; current locks are deterministic hash locks
+- Claude and Cursor live runtime payload capture still requires controlled local runtime scenarios; Cursor CLI is not available on this machine
+- PLAN locks support optional OpenSSH signatures; deployments still need an allowed signers/key-management policy

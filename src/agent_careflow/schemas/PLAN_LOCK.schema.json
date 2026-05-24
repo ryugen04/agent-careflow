@@ -17,6 +17,18 @@
     },
     "schema_version": {
       "const": 1
+    },
+    "signature": {
+      "type": "string"
+    },
+    "signature_algorithm": {
+      "type": "string"
+    },
+    "signature_namespace": {
+      "type": "string"
+    },
+    "signature_principal": {
+      "type": "string"
     }
   },
   "required": [

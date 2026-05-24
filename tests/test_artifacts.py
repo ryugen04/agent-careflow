@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import json
+import subprocess
 from pathlib import Path
 
 import pytest
 
-from agent_careflow.artifacts import ValidationError, sha256_file, validate_discharge, validate_order, validate_plan, validate_research, write_plan_lock
+from agent_careflow.artifacts import ValidationError, read_plan_lock, sha256_file, validate_discharge, validate_order, validate_plan, validate_research, write_plan_lock
 from agent_careflow.research import scaffold_research
 from agent_careflow.templates import render_order, render_plan
 
@@ -186,3 +188,41 @@ def test_schema_validation_rejects_invalid_plan_risk(tmp_path: Path) -> None:
 
     with pytest.raises(ValidationError, match="invalid value"):
         validate_plan(plan)
+
+def make_signing_key(tmp_path: Path) -> tuple[Path, Path, str]:
+    key = tmp_path / "plan_lock_key"
+    principal = "plan-lock@example.com"
+    subprocess.run(["ssh-keygen", "-t", "ed25519", "-N", "", "-f", key.as_posix()], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    public_key = key.with_suffix(".pub").read_text(encoding="utf-8").strip()
+    allowed = tmp_path / "allowed_signers"
+    allowed.write_text(f"{principal} {public_key}\n", encoding="utf-8")
+    return key, allowed, principal
+
+
+def test_signed_plan_lock_validates_with_allowed_signer(tmp_path: Path) -> None:
+    case = tmp_path / ".careflow" / "cases" / "ACF-1"
+    case.mkdir(parents=True)
+    plan = case / "PLAN.md"
+    plan.write_text(render_plan("ACF-1", "Signed", "C1"), encoding="utf-8")
+    key, allowed, principal = make_signing_key(tmp_path)
+
+    write_plan_lock(plan, signing_key=key, signing_principal=principal)
+
+    lock = read_plan_lock(case / "PLAN.lock.json")
+    assert lock["signature_algorithm"] == "openssh"
+    validate_plan(plan, require_signature=True, allowed_signers=allowed, signing_principal=principal)
+
+
+def test_signed_plan_lock_rejects_tampering(tmp_path: Path) -> None:
+    case = tmp_path / ".careflow" / "cases" / "ACF-1"
+    case.mkdir(parents=True)
+    plan = case / "PLAN.md"
+    plan.write_text(render_plan("ACF-1", "Signed", "C1"), encoding="utf-8")
+    key, allowed, principal = make_signing_key(tmp_path)
+    lock_path = write_plan_lock(plan, signing_key=key, signing_principal=principal)
+    lock = json.loads(lock_path.read_text(encoding="utf-8"))
+    lock["locked_at"] = "2026-05-25T00:00:00+09:00"
+    lock_path.write_text(json.dumps(lock, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    with pytest.raises(ValidationError, match="signature verification failed"):
+        validate_plan(plan, require_signature=True, allowed_signers=allowed, signing_principal=principal)

@@ -27,3 +27,18 @@ def render_post_tool_use(decision: Decision) -> str:
     if decision.status == DecisionStatus.WARN:
         return dumps({"systemMessage": decision.reason})
     return "{}"
+
+def render_stop(decision: Decision) -> str:
+    if decision.status == DecisionStatus.DENY:
+        return dumps({"decision": "block", "reason": decision.reason})
+    if decision.status == DecisionStatus.WARN:
+        return dumps({"systemMessage": decision.reason})
+    return "{}"
+
+
+def render_subagent_start(decision: Decision) -> str:
+    return render_stop(decision)
+
+
+def render_subagent_stop(decision: Decision) -> str:
+    return render_stop(decision)

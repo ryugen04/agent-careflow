@@ -74,3 +74,66 @@ def render_takt_analysis(analysis: TaktAnalysis) -> str:
             "",
         ]
     )
+
+def render_takt_import(path: Path) -> str:
+    analysis = analyze_takt_workflow(path)
+    text = path.read_text(encoding="utf-8")
+    role = "implementer"
+    for line in text.splitlines():
+        if line.strip().lower().startswith(("persona:", "role:")):
+            _, value = line.split(":", 1)
+            role = value.strip() or role
+            break
+    deliverable = "RESULT artifact"
+    for line in text.splitlines():
+        if line.strip().lower().startswith("output:"):
+            _, value = line.split(":", 1)
+            deliverable = value.strip() or deliverable
+            break
+    mapping_lines = [f"- {key}: {value}" for key, value in sorted(analysis.mappings.items())] or ["- none"]
+    risk_lines = [f"- {risk}" for risk in analysis.risks] or ["- none"]
+    return "\n".join(
+        [
+            f"# TAKT Import: {path}",
+            "",
+            "## Suggested ORDER",
+            "",
+            f"assigned_role: {role}",
+            "allowed_actions:",
+            "  - follow imported workflow instructions",
+            "forbidden_actions:",
+            "  - bypass agent-careflow policy gates",
+            "deliverables:",
+            f"  - {deliverable}",
+            "",
+            "## Concept Mapping",
+            "",
+            *mapping_lines,
+            "",
+            "## Import Risks",
+            "",
+            *risk_lines,
+            "",
+            "## Recommendation",
+            "",
+            analysis.recommendation,
+            "",
+        ]
+    )
+
+
+def render_takt_policy_export(root: Path) -> str:
+    root = root.resolve()
+    policy_files = [root / "rules" / "global" / "command-policy.yaml", root / "rules" / "global" / "phase-policy.yaml"]
+    lines = ["# TAKT Policy Export", "", "source: agent-careflow", "policy:"]
+    for policy_file in policy_files:
+        if not policy_file.exists():
+            continue
+        lines.extend([f"  - name: {policy_file.stem}", f"    path: {policy_file.relative_to(root).as_posix()}", "    content: |"])
+        for line in policy_file.read_text(encoding="utf-8").splitlines():
+            lines.append(f"      {line}")
+    if lines[-1] == "policy:":
+        lines.append("  - name: none")
+        lines.append("    content: no agent-careflow policy files found")
+    lines.append("")
+    return "\n".join(lines)

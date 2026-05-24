@@ -1,23 +1,53 @@
 {
   "hooks": {
-    "PreToolUse": [
+    "PostToolUse": [
       {
-        "matcher": "Bash|Write|Edit|MultiEdit",
         "hooks": [
           {
-            "type": "command",
-            "command": "agent-careflow hook claude pre-tool-use --on-missing-context warn"
+            "command": "agent-careflow hook claude post-tool-use --on-missing-context warn",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|Write|Edit|MultiEdit"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "agent-careflow hook claude pre-tool-use --on-missing-context warn",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|Write|Edit|MultiEdit"
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "agent-careflow hook claude stop",
+            "type": "command"
           }
         ]
       }
     ],
-    "PostToolUse": [
+    "SubagentStart": [
       {
-        "matcher": "Bash|Write|Edit|MultiEdit",
         "hooks": [
           {
-            "type": "command",
-            "command": "agent-careflow hook claude post-tool-use --on-missing-context warn"
+            "command": "agent-careflow hook claude subagent-start",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "command": "agent-careflow hook claude subagent-stop",
+            "type": "command"
           }
         ]
       }
