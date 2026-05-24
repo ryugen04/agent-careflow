@@ -15,7 +15,7 @@ from .hooks import cursor as cursor_hooks
 from .research import scaffold_research
 from .templates import render_case, render_discharge, render_plan
 from .bootstrap.target_repo import bootstrap_target_repo
-from .lifecycle import advance_phase, case_status, issue_order, new_incident, validate_result, validate_review
+from .lifecycle import advance_phase, case_status, collect_evidence, issue_order, new_incident, validate_result, validate_review
 from .orders import order_status, render_order_prompt
 from .isolation import plan_isolation, render_isolation_plan
 from .takt import analyze_takt_workflow, render_takt_analysis
@@ -192,6 +192,14 @@ def cmd_incident_new(args: argparse.Namespace) -> int:
     except (OSError, ValidationError) as exc:
         return fail(exc)
     return ok(f"incident created: {path}")
+
+
+def cmd_evidence_collect(args: argparse.Namespace) -> int:
+    try:
+        path = collect_evidence(Path.cwd(), args.case, args.kind)
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return ok(f"evidence collected: {path}")
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -388,6 +396,13 @@ def build_parser() -> argparse.ArgumentParser:
     incident_new.add_argument("--case", required=True)
     incident_new.add_argument("--trigger", required=True)
     incident_new.set_defaults(func=cmd_incident_new)
+
+    evidence = sub.add_parser("evidence")
+    evidence_sub = evidence.add_subparsers(dest="evidence_command", required=True)
+    evidence_collect = evidence_sub.add_parser("collect")
+    evidence_collect.add_argument("--case", required=True)
+    evidence_collect.add_argument("--kind", choices=["git-status"], required=True)
+    evidence_collect.set_defaults(func=cmd_evidence_collect)
 
     phase = sub.add_parser("phase")
     phase_sub = phase.add_subparsers(dest="phase_command", required=True)

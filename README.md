@@ -89,6 +89,7 @@ Health and validation:
 agent-careflow doctor
 agent-careflow research validate
 agent-careflow order status --case <case_id> --order ORD-001
+agent-careflow evidence collect --case <case_id> --kind git-status
 ```
 
 Policy checks:
@@ -126,7 +127,7 @@ v0.1 is handoff-ready for local control-repository use:
 - concrete artifact templates and runtime schema validation
 - CASE, PLAN, PLAN.lock, ORDER, RESULT, INCIDENT, REVIEW, CONFERENCE, and DISCHARGE validation surface
 - `doctor` one-shot repository health check
-- case creation, phase status/advance, order issue/prompt/status, result/review validation, incident creation, and close/discharge validation
+- case creation, phase status/advance, order issue/prompt/status, evidence collection, result/review validation, incident creation, and close/discharge validation
 - YAML-backed policy engine for phase/file/command gates
 - prompt guard for likely secrets and PHI-like identifiers before agent context entry
 - Codex, Claude, and Cursor hook adapter entrypoints with fixtures

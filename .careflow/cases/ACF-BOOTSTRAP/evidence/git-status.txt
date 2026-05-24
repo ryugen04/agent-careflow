@@ -1,0 +1,7 @@
+$ git status --short
+ M README.md
+ M src/agent_careflow/cli.py
+ M src/agent_careflow/lifecycle.py
+ M tests/test_lifecycle.py
+?? .careflow/cases/ACF-BOOTSTRAP/evidence/git-status.txt
+?? .codex/plans/2026-05-23-evidence-collect.md

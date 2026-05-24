@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pytest
 
 from agent_careflow.artifacts import ValidationError
-from agent_careflow.lifecycle import advance_phase, case_status, issue_order, new_incident, validate_result, validate_review
+from agent_careflow.lifecycle import advance_phase, case_status, collect_evidence, issue_order, new_incident, validate_result, validate_review
 from agent_careflow.templates import render_discharge, render_plan
 
 
@@ -97,3 +98,23 @@ def test_close_validate_alias_uses_discharge_validator(tmp_path: Path, monkeypat
     monkeypatch.chdir(tmp_path)
 
     assert main(["close", "validate", "--case", "ACF-1"]) == 1
+
+
+def test_collect_git_status_evidence(tmp_path: Path) -> None:
+    make_case(tmp_path)
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (tmp_path / "tracked.txt").write_text("changed", encoding="utf-8")
+
+    path = collect_evidence(tmp_path, "ACF-1", "git-status")
+
+    text = path.read_text(encoding="utf-8")
+    assert path.name == "git-status.txt"
+    assert "$ git status --short" in text
+    assert "tracked.txt" in text
+
+
+def test_collect_evidence_rejects_unknown_kind(tmp_path: Path) -> None:
+    make_case(tmp_path)
+
+    with pytest.raises(ValidationError, match="unsupported evidence kind"):
+        collect_evidence(tmp_path, "ACF-1", "pytest")

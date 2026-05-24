@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -118,4 +119,29 @@ def new_incident(root: Path, case_id: str, trigger: str) -> Path:
         f"""# INCIDENT: {incident_id}\n\nincident_id: {incident_id}\ncase_id: {case_id}\ntrigger: {trigger}\nstatus: open\ncreated_at: {now}\nseverity: medium\n\n## Summary\n\nTriage required.\n\n## Corrective action\n\nCorrective action required.\n""",
         encoding="utf-8",
     )
+    return path
+
+
+def collect_evidence(root: Path, case_id: str, kind: str) -> Path:
+    if kind != "git-status":
+        raise ValidationError(f"unsupported evidence kind: {kind}")
+    cdir = case_dir(root, case_id)
+    if not cdir.exists():
+        raise ValidationError(f"case not found: {case_id}")
+    evidence = cdir / "evidence"
+    evidence.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(
+        ["git", "status", "--short"],
+        cwd=root,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or f"exit {result.returncode}"
+        raise ValidationError(f"git status failed: {detail}")
+    output = result.stdout.rstrip() or "clean"
+    path = evidence / "git-status.txt"
+    path.write_text(f"$ git status --short\n{output}\n", encoding="utf-8")
     return path
