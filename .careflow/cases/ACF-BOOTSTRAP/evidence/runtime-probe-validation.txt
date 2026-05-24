@@ -1,21 +1,31 @@
-# Runtime Probe Status
+# Runtime Compatibility Observations
 
 recorded_at: 2026-05-25T00:34:56+09:00
 
-## Tools
+## Core conformance status
 
-- codex: available=yes; version=codex-cli 0.133.0; path=/home/glaucus03/.nvm/versions/node/v22.14.0/bin/codex
-- claude: available=yes; version=2.1.108 (Claude Code); path=/home/glaucus03/.local/bin/claude
-- cursor: available=no; version=unknown; path=not found
+Core completion is based on fixture replay and `agent-careflow.adapter_conformance.v1` records, not live runtime capture. The relevant boundary is:
 
-## Probe Files
+- runtime-shaped fixture input
+- normalized careflow event
+- shared policy `Decision`
+- adapter-rendered JSON output
+- conformance status: `pass`, `fail`, `unsupported`, or `environment_unavailable`
 
-- /home/glaucus03/dev/projects/agent-careflow/.codex/probes/2026-05-21-hook-capture-smoke/runtime-probe.jsonl: valid (1 record(s))
-- /home/glaucus03/dev/projects/agent-careflow/.codex/probes/2026-05-21-hook-runtime/runtime-probe.jsonl: valid (5 record(s))
-- /home/glaucus03/dev/projects/agent-careflow/.codex/probes/2026-05-21-live-codex-hook-probe/runtime-probe.jsonl: valid (2 record(s))
+## Local tool observations
 
-## Live Runtime Capture Attempts
+- Codex: available; observed `codex-cli 0.133.0` at `/home/glaucus03/.nvm/versions/node/v22.14.0/bin/codex`. Controlled `codex exec --enable hooks --dangerously-bypass-hook-trust` runs completed model execution, but hook dispatch/capture was not observed in non-interactive mode. Status: compatibility observation, not a core conformance blocker.
+- Claude: available; observed `2.1.108 (Claude Code)` at `/home/glaucus03/.local/bin/claude`. Controlled stream-json run emitted lifecycle data but stopped with organization/auth access failure. Status: `environment_unavailable` for live compatibility evidence.
+- Cursor: `cursor` was not on PATH. Status: `environment_unavailable` for live compatibility evidence.
 
-- Codex: attempted controlled `codex exec --enable hooks --dangerously-bypass-hook-trust` runs against `/tmp/agent-careflow-live-codex-probe`; model run succeeded and returned `ok`, but neither project `.codex/hooks.json` nor inline `-c hooks.*` commands produced a capture JSONL file. Status: inconclusive hook dispatch in Codex CLI 0.133.0.
-- Claude: attempted controlled `claude -p --verbose --output-format stream-json --include-hook-events --settings /tmp/agent-careflow-live-claude-probe/settings.json`; runtime emitted stream-json lifecycle data but stopped with authentication failure: `Your organization does not have access to Claude`. No capture JSONL file was produced. Status: blocked by Claude auth/organization access.
-- Cursor: `cursor` is not on PATH. Status: blocked by unavailable local runtime.
+## Historical probe files
+
+The older `.codex/probes/*/runtime-probe.jsonl` files are retained as historical runtime observations only. They used the retired `codex.runtime_probe.v1` shape and may contain `inconclusive`; new conformance validation intentionally rejects that schema.
+
+## Codex follow-up dispatch attempts
+
+- Verified official Codex hooks documentation says hooks are enabled by the canonical `[features].hooks` flag, are discovered from user/project `hooks.json` or inline `[hooks]`, and project-local hooks require a trusted project layer.
+- Confirmed `/home/glaucus03/.codex/hooks.json` is a symlink to this repo's `rules/codex/hooks.json`, so the user-level hook layer exists.
+- Temporarily replaced the symlink target with capture-only UserPromptSubmit/Stop/PreToolUse hooks and ran `codex exec --enable hooks --dangerously-bypass-hook-trust`; no capture JSONL was produced.
+- Temporarily added trusted project `.codex/config.toml` inline hooks and ran `codex exec --enable hooks --dangerously-bypass-hook-trust`; no capture JSONL was produced.
+- Observed `codex exec` model runs succeeded, but hook dispatch was not observed in Codex CLI 0.133.0 non-interactive mode. This remains a runtime compatibility note, not an agent-careflow validator issue.

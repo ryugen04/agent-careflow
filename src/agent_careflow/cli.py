@@ -9,10 +9,10 @@ from .artifacts import ValidationError, case_dir, sha256_file, validate_case, va
 from .constants import CASES_DIR, RISK_CLASSES
 from .policy.engine import PolicyEngine
 from .hooks.common import evaluate_lifecycle_hook, evaluate_permission_request, evaluate_pre_tool_use, evaluate_user_prompt_submit, load_payload, record_hook_incident
-from .hooks.capture import append_capture_record, render_runtime_status, runtime_status, validate_capture_file
 from .hooks import claude as claude_hooks
 from .hooks import codex as codex_hooks
 from .hooks import cursor as cursor_hooks
+from .conformance import append_record, conformance_status, render_status_markdown, validate_file
 from .research import scaffold_research
 from .templates import render_case, render_discharge, render_plan
 from .bootstrap.target_repo import bootstrap_target_repo
@@ -336,39 +336,33 @@ def cmd_takt_export_policy(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_hook_capture(args: argparse.Namespace) -> int:
+def cmd_conformance_record(args: argparse.Namespace) -> int:
     try:
-        payload = load_payload(sys.stdin.read())
-        append_capture_record(
-            output=Path(args.output),
-            event=args.event_name,
-            probe=args.probe,
-            cwd=Path.cwd(),
-            input_payload=payload,
-            verdict=args.verdict,
-            notes=args.notes,
-        )
+        append_record(output=Path(args.output), adapter=args.adapter, event=args.event, fixture=Path(args.fixture), notes=args.notes)
     except ValidationError as exc:
         return fail(exc)
-    return ok(f"hook payload captured: {args.output}")
+    return ok(f"conformance record written: {args.output}")
 
 
-def cmd_hook_probe_validate(args: argparse.Namespace) -> int:
+def cmd_conformance_validate(args: argparse.Namespace) -> int:
     try:
-        count = validate_capture_file(Path(args.input))
+        count = validate_file(Path(args.input))
     except ValidationError as exc:
         return fail(exc)
-    return ok(f"probe valid: {args.input} ({count} record(s))")
+    return ok(f"conformance valid: {args.input} ({count} record(s))")
 
 
-def cmd_hook_runtime_status(args: argparse.Namespace) -> int:
-    status = runtime_status(root=Path.cwd(), probe_files=[Path(path) for path in args.probe] if args.probe else None)
-    rendered = render_runtime_status(status) if args.format == "markdown" else json.dumps(status, indent=2, sort_keys=True) + "\n"
+def cmd_conformance_status(args: argparse.Namespace) -> int:
+    try:
+        status = conformance_status(root=Path.cwd())
+    except ValidationError as exc:
+        return fail(exc)
+    rendered = render_status_markdown(status) if args.format == "markdown" else json.dumps(status, indent=2, sort_keys=True) + "\n"
     if args.output:
         output = Path(args.output)
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(rendered, encoding="utf-8")
-        return ok(f"runtime status written: {output}")
+        return ok(f"conformance status written: {output}")
     print(rendered, end="")
     return 0
 
@@ -611,23 +605,25 @@ def build_parser() -> argparse.ArgumentParser:
     takt_export.add_argument("--output")
     takt_export.set_defaults(func=cmd_takt_export_policy)
 
+    conformance = sub.add_parser("conformance")
+    conformance_sub = conformance.add_subparsers(dest="conformance_command", required=True)
+    conformance_record = conformance_sub.add_parser("record")
+    conformance_record.add_argument("--adapter", choices=["codex", "claude", "cursor"], required=True)
+    conformance_record.add_argument("--event", required=True)
+    conformance_record.add_argument("--fixture", required=True)
+    conformance_record.add_argument("--output", required=True)
+    conformance_record.add_argument("--notes", default="fixture replay")
+    conformance_record.set_defaults(func=cmd_conformance_record)
+    conformance_validate = conformance_sub.add_parser("validate")
+    conformance_validate.add_argument("--input", required=True)
+    conformance_validate.set_defaults(func=cmd_conformance_validate)
+    conformance_status_parser = conformance_sub.add_parser("status")
+    conformance_status_parser.add_argument("--format", choices=["json", "markdown"], default="markdown")
+    conformance_status_parser.add_argument("--output")
+    conformance_status_parser.set_defaults(func=cmd_conformance_status)
+
     hook = sub.add_parser("hook")
     hook_sub = hook.add_subparsers(dest="tool", required=True)
-    capture = hook_sub.add_parser("capture")
-    capture.add_argument("--event-name", required=True)
-    capture.add_argument("--output", required=True)
-    capture.add_argument("--probe", default="hook-payload-capture")
-    capture.add_argument("--verdict", choices=["pass", "fail", "inconclusive"], default="inconclusive")
-    capture.add_argument("--notes", default="runtime-observed: captured hook stdin payload")
-    capture.set_defaults(func=cmd_hook_capture)
-    probe_validate = hook_sub.add_parser("probe-validate")
-    probe_validate.add_argument("--input", required=True)
-    probe_validate.set_defaults(func=cmd_hook_probe_validate)
-    runtime_status_parser = hook_sub.add_parser("runtime-status")
-    runtime_status_parser.add_argument("--probe", action="append", default=[])
-    runtime_status_parser.add_argument("--format", choices=["json", "markdown"], default="markdown")
-    runtime_status_parser.add_argument("--output")
-    runtime_status_parser.set_defaults(func=cmd_hook_runtime_status)
     for tool_name in ("codex", "claude", "cursor"):
         tool_parser = hook_sub.add_parser(tool_name)
         event_sub = tool_parser.add_subparsers(dest="event", required=True)

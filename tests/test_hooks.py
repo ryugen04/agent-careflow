@@ -41,35 +41,6 @@ def test_cursor_renderer_uses_generic_block_shape() -> None:
 
     assert rendered == {"decision": "block", "reason": "git reset --hard is blocked by policy"}
 
-def test_hook_capture_writes_probe_log_record(tmp_path: Path) -> None:
-    from agent_careflow.hooks.capture import append_capture_record, validate_capture_file
-
-    output = tmp_path / "probe.jsonl"
-    append_capture_record(
-        output=output,
-        event="PreToolUse",
-        probe="unit-capture",
-        cwd=tmp_path,
-        input_payload={"tool_name": "Bash", "tool_input": {"command": "date"}},
-    )
-
-    record = json.loads(output.read_text(encoding="utf-8"))
-    assert record["schema"] == "codex.runtime_probe.v1"
-    assert record["event"] == "PreToolUse"
-    assert record["input_payload"]["tool_name"] == "Bash"
-    assert record["verdict"] == "inconclusive"
-
-def test_hook_capture_rejects_unknown_event(tmp_path: Path) -> None:
-    from agent_careflow.artifacts import ValidationError
-    from agent_careflow.hooks.capture import append_capture_record, validate_capture_file
-
-    try:
-        append_capture_record(output=tmp_path / "probe.jsonl", event="Unknown", probe="unit", cwd=tmp_path, input_payload={})
-    except ValidationError as exc:
-        assert "unsupported probe event" in str(exc)
-    else:
-        raise AssertionError("expected ValidationError")
-
 def test_codex_user_prompt_submit_blocks_secret() -> None:
     from agent_careflow.hooks.common import evaluate_user_prompt_submit
 
@@ -122,37 +93,3 @@ def test_hook_denial_can_record_incident(tmp_path: Path) -> None:
     text = path.read_text(encoding="utf-8")
     assert "hook_policy_denied" in text
     assert ('git reset --' + 'hard') in text
-
-def test_hook_probe_validate_accepts_capture_log(tmp_path: Path) -> None:
-    from agent_careflow.hooks.capture import append_capture_record, validate_capture_file
-
-    output = tmp_path / "probe.jsonl"
-    append_capture_record(output=output, event="Stop", probe="unit", cwd=tmp_path, input_payload={"hook_event_name": "Stop"}, verdict="pass")
-
-    assert validate_capture_file(output) == 1
-
-def test_hook_probe_validate_rejects_bad_verdict(tmp_path: Path) -> None:
-    from agent_careflow.artifacts import ValidationError
-    from agent_careflow.hooks.capture import validate_capture_file
-
-    output = tmp_path / "probe.jsonl"
-    output.write_text('{"schema":"codex.runtime_probe.v1","recorded_at":"now","probe":"unit","event":"Stop","command":[],"cwd":".","input_payload":{},"stdout":"","stderr":"","exit_code":0,"verdict":"maybe","notes":"bad"}\n', encoding="utf-8")
-
-    try:
-        validate_capture_file(output)
-    except ValidationError as exc:
-        assert "unsupported verdict" in str(exc)
-    else:
-        raise AssertionError("expected ValidationError")
-
-def test_runtime_status_reports_tools_and_probe_files(tmp_path: Path) -> None:
-    from agent_careflow.hooks.capture import append_capture_record, runtime_status
-
-    probe = tmp_path / "probe.jsonl"
-    append_capture_record(output=probe, event="Stop", probe="unit", cwd=tmp_path, input_payload={"hook_event_name": "Stop"}, verdict="pass")
-
-    status = runtime_status(root=tmp_path, probe_files=[probe])
-
-    assert status["schema"] == "agent-careflow.runtime_status.v1"
-    assert set(status["tools"]) == {"codex", "claude", "cursor"}
-    assert status["probes"] == [{"path": probe.as_posix(), "ok": True, "records": 1}]

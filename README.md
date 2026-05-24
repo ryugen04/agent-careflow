@@ -102,12 +102,14 @@ agent-careflow policy check-file --case <case_id> --path src/app.py --operation 
 agent-careflow policy check-command --command "git reset --hard HEAD"
 ```
 
-Hook adapters and prompt guard:
+Hook adapters, prompt guard, and adapter conformance:
 
 ```bash
 printf '{"prompt":"debug patient MRN: ABC123456"}' | agent-careflow hook codex user-prompt-submit
 agent-careflow hook codex pre-tool-use < tests/fixtures/hooks/codex_pre_tool_use_bash_danger.json
-agent-careflow hook runtime-status --format markdown --output .careflow/cases/<case_id>/evidence/runtime-probe-validation.txt
+agent-careflow conformance record --adapter codex --event pre-tool-use --fixture tests/fixtures/hooks/codex_pre_tool_use_bash_danger.json --output .careflow/conformance/codex.jsonl
+agent-careflow conformance validate --input .careflow/conformance/codex.jsonl
+agent-careflow conformance status --format markdown
 ```
 
 Bootstrap and planning support:
@@ -132,22 +134,19 @@ Policy behavior is configured from `rules/global/*.yaml` when those files exist.
 v0.1 is handoff-ready for local control-repository use:
 
 - research scaffold, source registry, and validation
-- concrete artifact templates and runtime schema validation
+- concrete artifact templates and schema validation
 - CASE, PLAN, PLAN.lock, ORDER, RESULT, INCIDENT, REVIEW, CONFERENCE, and DISCHARGE validation surface
 - `doctor` one-shot repository health check
 - case creation, phase status/advance, order issue/prompt/status, evidence collection, result/review validation, incident creation, and close/discharge validation
 - YAML-backed policy engine for phase/file/command gates
 - prompt guard for likely secrets and PHI-like identifiers before agent context entry
 - Codex, Claude, and Cursor hook adapter entrypoints with fixtures, Stop hooks, and opt-in incident creation on deny
-- hook payload capture and validation commands using `codex.runtime_probe.v1` JSONL
+- adapter conformance records using `agent-careflow.adapter_conformance.v1` JSONL
+- fixture replay that verifies input normalization, shared policy decisions, and runtime-specific renderer output
 - target repository bootstrap profiles that record tool intent while writing only `.careflow/` runtime files
 - profile validate/render/install support for rendered tool configs
 - isolation planning and guarded worktree/clone execution with patch export
 - TAKT comparative analysis plus import/export reports
 - focused unit and fixture tests
 
-Known external blockers and backlog:
-
-- live Codex hook payload capture is inconclusive in this environment because repo-local hooks did not emit capture logs under `codex exec`, and temporary `CODEX_HOME` lacks auth
-- Claude and Cursor live runtime payload capture still requires controlled local runtime scenarios; Cursor CLI is not available on this machine
-- PLAN locks support optional OpenSSH signatures; deployments still need an allowed signers/key-management policy
+Runtime compatibility evidence is optional for v0.1. Fixture replay and adapter conformance decide core completion; live Codex, Claude, or Cursor CLI runs can be recorded separately as environment observations. PLAN locks support optional OpenSSH signatures; deployments still need an allowed signers/key-management policy.

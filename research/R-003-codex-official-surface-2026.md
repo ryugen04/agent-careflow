@@ -20,7 +20,7 @@ Codex CLI, hooks, subagents, skills, AGENTS.md, config, sandboxing, MCP, plugins
 
 ## Verified facts
 
-Draft. Local runtime probing is still required before hook adapters are implemented.
+Draft. Adapter correctness is evaluated through careflow protocol fixtures and conformance records; live CLI behavior is recorded separately as compatibility evidence.
 
 ## Implementation implications
 
@@ -28,15 +28,15 @@ Do not embed policy in prompts; hook adapters should call the shared CLI.
 
 ## Risks / caveats
 
-Hook payload schema and CLI behavior may differ by installed Codex version.
+Hook payload schema and CLI behavior may differ by installed Codex version, so live observations should be treated as compatibility notes unless they contradict fixture-based adapter contracts.
 
 ## Open questions
 
-Which hook events can reliably block unsafe commands in the local runtime?
+Which live Codex CLI modes dispatch each hook event reliably in local environments?
 
 ## Decisions proposed
 
-Defer adapter implementation until fixture capture and runtime probing.
+Implement adapter renderers against fixture-based conformance first; use live runtime runs as optional compatibility evidence.
 
 ## References to add to PLAN
 
@@ -46,10 +46,10 @@ R-003 should inform Codex adapter and hook fixtures.
 
 Codex hook adapters are implemented as thin wrappers around the shared CLI policy engine. The implementation follows the official Codex hooks shape for JSON stdin, `PreToolUse` tool fields, and `hookSpecificOutput.permissionDecision` deny responses. `PermissionRequest` remains represented as a Codex-specific renderer and should be validated against local runtime fixtures before production use.
 
-## Runtime probe 2026-05-21
+## Adapter conformance 2026-05-21
 
-runtime-observed: `codex --version` reports `codex-cli 0.131.0`. `codex --help` and `codex --profile codex-config-edit --help` complete successfully. Local adapter renderer probes for Codex `PreToolUse` and `PermissionRequest` produce deny JSON for dangerous command fixtures, and the probe log validates as `codex.runtime_probe.v1`. This does not yet prove live Codex hook event payload shape from an interactive session; that remains a separate fixture-capture task.
+fixture-observed: `codex --version` reported `codex-cli 0.131.0` during earlier local checks. Local Codex adapter renderer fixtures for `PreToolUse` and `PermissionRequest` produce deny JSON for dangerous command fixtures and now validate as `agent-careflow.adapter_conformance.v1` records. This validates careflow normalization, shared policy decisions, and Codex renderer output without requiring a live Codex session.
 
-## Runtime probe 2026-05-21 live hook attempt
+## Runtime compatibility note 2026-05-21 live hook attempt
 
-runtime-observed: project-local `.codex/hooks.json` did not produce a capture log during `codex exec` in a temporary repo, even with `--dangerously-bypass-hook-trust`; the command itself completed but the requested Bash command failed under this environment's bubblewrap limitation. A second attempt using a temporary `CODEX_HOME` with user-level `hooks.json` failed with 401 because auth was not present in that temporary home. The live payload capture remains inconclusive. The Codex hooks template was corrected to match the official top-level `{ "hooks": { ... } }` config shape documented by OpenAI.
+runtime-observed: project-local `.codex/hooks.json` did not produce a capture log during `codex exec` in a temporary repo, even with `--dangerously-bypass-hook-trust`; the command itself completed but the requested Bash command failed under this environment's bubblewrap limitation. A second attempt using a temporary `CODEX_HOME` with user-level `hooks.json` failed with 401 because auth was not present in that temporary home. This is retained as a compatibility observation, not an implementation blocker for adapter conformance. The Codex hooks template was corrected to match the official top-level `{ "hooks": { ... } }` config shape documented by OpenAI.

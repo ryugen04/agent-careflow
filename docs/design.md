@@ -116,6 +116,20 @@ The point is not bureaucracy. The point is proportional control.
 
 Codex, Claude Code, Cursor, and future tools are adapters. Policy logic must not be duplicated inside tool-specific config files. Tool-specific hooks should call the shared `agent-careflow` CLI, and the CLI should make the decision.
 
+## Careflow Protocol and Adapter Conformance
+
+The core protocol normalizes runtime-shaped input into a careflow event, runs shared policy, and returns a `Decision`. Runtime adapters are intentionally thin: they render that decision into the JSON shape expected by Codex, Claude, Cursor, or another tool.
+
+Adapter conformance verifies that boundary with fixture replay:
+
+- fixture input is parsed as runtime-shaped JSON
+- the input is normalized into a careflow event
+- shared policy returns the decision
+- the selected adapter renders valid runtime-specific JSON
+- the result is recorded as `agent-careflow.adapter_conformance.v1` JSONL
+
+Live runtime execution is compatibility evidence, not a required condition for core correctness. If a local Codex, Claude, or Cursor installation is unavailable or behaves differently, that observation belongs in evidence notes without blocking protocol conformance.
+
 ## Incident Philosophy
 
 An incident is not only a production outage. In AI-agent work, incidents include:
@@ -147,7 +161,7 @@ The following features support the core model but are not the model itself:
 
 - hook adapters
 - prompt guard
-- runtime hook capture
+- adapter conformance fixture replay
 - TAKT comparison
 - isolation planning
 - profile bootstrap

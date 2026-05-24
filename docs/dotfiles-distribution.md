@@ -9,7 +9,7 @@ This design keeps `agent-careflow` as the source of truth and limits dotfiles to
 - lifecycle CLI and validators
 - schemas, templates, profiles, and policy YAML
 - Codex, Claude, and Cursor adapter configs
-- hook entrypoints and runtime policy behavior
+- hook entrypoints, adapter renderers, and policy behavior
 - documentation for the careflow workflow
 
 Dotfiles owns only user-environment installation:
@@ -58,7 +58,7 @@ Old dotfiles content should be treated as legacy:
 | `PermissionRequest` | Run escalation policy through `agent-careflow hook codex permission-request`. | Deny by default. | Escalated actions without case context should be explicit and conservative. |
 | `PostToolUse` | Capture evidence/checkpoints through `agent-careflow hook codex post-tool-use`. | Warn only. | Post hooks cannot undo tool effects; they should report missing context. |
 
-`SessionStart` and `Stop` stay out of the default Codex adapter until their local runtime payloads and output behavior are verified. They can be added later after a runtime probe and a documented acceptance test.
+`SessionStart` stays out of the default Codex adapter until a fixture and adapter contract are defined. `Stop` can be represented by fixture replay and conformance records; live CLI execution is optional runtime compatibility evidence rather than a bootstrap prerequisite.
 
 ## Parent Repository and Worktree Model
 
@@ -85,3 +85,9 @@ A completed dotfiles adaptation should satisfy all of these:
 - Machine-specific paths are generated locally, not committed.
 - Existing unmanaged `~/.codex/config.toml` content and trust paths are preserved outside managed blocks.
 - Worktree use is explicit: each active worktree has its own `.careflow/` if it runs careflow-controlled agent work.
+
+## Adapter Conformance and Runtime Evidence
+
+Dotfiles should install or link adapter configs, but conformance belongs to `agent-careflow`. The expected validation path is `agent-careflow conformance record`, `agent-careflow conformance validate`, and `agent-careflow conformance status`.
+
+Live Codex, Claude, or Cursor runs may be collected as compatibility evidence when credentials and local binaries are available. Those observations should not change the ownership boundary: target repositories still receive only `.careflow/` runtime artifacts, and tool-specific configs remain global/user-level links managed outside the target repo.
