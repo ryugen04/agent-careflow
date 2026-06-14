@@ -1,6 +1,6 @@
 # Repository Workspace
 
-workflow_root: `/home/glaucus03/dev/projects/agent-careflow`
+workflow_root: `.`
 
 Canonical careflow artifacts remain under `.careflow/`; do not create case/order/result artifacts inside child repos or worktrees.
 

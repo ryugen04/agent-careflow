@@ -6,7 +6,7 @@ import shlex
 from .decisions import Decision, allow, deny
 
 FORBIDDEN_PATTERNS = [
-    (re.compile(r"(^|&&|;)\s*git\s+push(\s|$)"), "git push is blocked by policy"),
+    (re.compile(r"(^|&&|;)\s*git\s+push\b.*\s(-f|--force(?:=|\s|$)|--force-with-lease(?:=|\s|$)|--mirror(?:\s|$))"), "force Git push is blocked by policy"),
     (re.compile(r"(^|&&|;)\s*git\s+reset\s+--hard(\s|$)"), "git reset --hard is blocked by policy"),
     (re.compile(r"(^|&&|;)\s*rm\s+(-[^\s]*r[^\s]*f|-rf|-fr)(\s|$)"), "rm -rf is blocked by policy"),
     (re.compile(r"curl\b.*\|\s*(sh|bash)\b"), "curl piped to a shell is blocked by policy"),

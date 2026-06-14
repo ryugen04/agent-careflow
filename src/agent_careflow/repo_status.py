@@ -43,7 +43,7 @@ def render_repo_status(root: Path) -> str:
     lines = [
         "# Repository Workspace",
         "",
-        f"workflow_root: `{root.resolve().as_posix()}`",
+        "workflow_root: `.`",
         "",
         "Canonical careflow artifacts remain under `.careflow/`; do not create case/order/result artifacts inside child repos or worktrees.",
         "",

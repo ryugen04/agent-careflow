@@ -131,6 +131,34 @@ def test_hybrid_gate_allows_non_file_non_command_tool_without_noise() -> None:
     assert "no careflow policy surface" in decision.reason
 
 
+def test_fail_closed_allows_non_file_non_command_tool_without_noise() -> None:
+    decision = evaluate_pre_tool_use(
+        {
+            "cwd": ".",
+            "tool_name": "functions.update_plan",
+            "tool_input": {"plan": []},
+        },
+        on_missing_context="deny",
+    )
+
+    assert decision.status == DecisionStatus.ALLOW
+    assert "no careflow policy surface" in decision.reason
+
+
+def test_hybrid_gate_denies_pathless_namespaced_mutating_tool_without_case() -> None:
+    decision = evaluate_pre_tool_use(
+        {
+            "cwd": ".",
+            "tool_name": "functions.apply_patch",
+            "tool_input": {},
+        },
+        on_missing_context="hybrid",
+    )
+
+    assert decision.status == DecisionStatus.DENY
+    assert "mutating tool" in decision.reason
+
+
 def test_hybrid_stop_warns_completion_claim_without_active_case(tmp_path: Path) -> None:
     decision = evaluate_lifecycle_hook(
         {

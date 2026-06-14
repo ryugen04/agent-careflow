@@ -79,7 +79,7 @@ def render_dashboard(cwd: Path) -> str:
     lines = [
         "# Agent Careflow Index",
         "",
-        f"workflow_root: `{root.as_posix()}`",
+        "workflow_root: `.`",
         f"state_file: `{CARE_DIR}/state.json`",
         f"active_case: `{active_case or 'none'}`",
         f"active_order: `{active_order or 'none'}`",

@@ -1,0 +1,8 @@
+## codex-agent-careflow-reliability...origin/codex/agent-careflow-reliability [ahead 1]
+ M .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-focused-tests.txt
+ M .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-full-tests.txt
+ M .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-git-status.txt
+ M .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-024.result.md
+ M rules/global/command-policy.yaml
+ M src/agent_careflow/policy/command_policy.py
+ M tests/test_policy.py

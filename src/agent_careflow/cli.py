@@ -44,6 +44,12 @@ def fail(error: Exception | str) -> int:
     return 1
 
 
+def display_path(path: Path, *, root: Path | None = None) -> str:
+    base = (root or Path.cwd()).resolve()
+    try:
+        return path.resolve().relative_to(base).as_posix()
+    except ValueError:
+        return path.as_posix()
 
 
 def cmd_workspace(args: argparse.Namespace) -> int:
@@ -60,7 +66,7 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
     try:
         if args.write:
             output = write_dashboard(Path.cwd(), Path(args.output) if args.output else None)
-            return ok(f"dashboard written: {output}")
+            return ok(f"dashboard written: {display_path(output)}")
         print(render_dashboard(Path.cwd()), end="")
     except (OSError, ValidationError) as exc:
         return fail(exc)
@@ -119,7 +125,7 @@ def cmd_plan_validate(args: argparse.Namespace) -> int:
         validate_plan(path, require_lock=args.require_lock, require_signature=args.require_signature, allowed_signers=Path(args.allowed_signers) if args.allowed_signers else None, signing_principal=args.signing_principal)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"plan valid: {path}")
+    return ok(f"plan valid: {display_path(path)}")
 
 
 def cmd_hash_plan(args: argparse.Namespace) -> int:
@@ -127,7 +133,7 @@ def cmd_hash_plan(args: argparse.Namespace) -> int:
     try:
         if args.write_lock:
             lock_path = write_plan_lock(path, signing_key=Path(args.signing_key) if args.signing_key else None, signing_principal=args.signing_principal)
-            return ok(f"plan lock written: {lock_path}")
+            return ok(f"plan lock written: {display_path(lock_path)}")
         print(sha256_file(path))
     except (OSError, ValidationError) as exc:
         return fail(exc)
@@ -143,7 +149,7 @@ def cmd_order_validate(args: argparse.Namespace) -> int:
         validate_order(path, Path.cwd())
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"order valid: {path}")
+    return ok(f"order valid: {display_path(path)}")
 
 
 def cmd_discharge_validate(args: argparse.Namespace) -> int:
@@ -153,7 +159,7 @@ def cmd_discharge_validate(args: argparse.Namespace) -> int:
         validate_discharge(path, root)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"discharge valid: {path}")
+    return ok(f"discharge valid: {display_path(path)}")
 
 
 def cmd_close_validate(args: argparse.Namespace) -> int:
@@ -185,7 +191,7 @@ def cmd_order_issue(args: argparse.Namespace) -> int:
         validate_order(path, Path.cwd())
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"order issued: {path}")
+    return ok(f"order issued: {display_path(path)}")
 
 
 def cmd_order_prompt(args: argparse.Namespace) -> int:
@@ -210,7 +216,7 @@ def cmd_order_result_skeleton(args: argparse.Namespace) -> int:
     try:
         if args.write:
             path = write_result_skeleton(Path.cwd(), args.case, args.order, force=args.force, status=args.status)
-            return ok(f"result skeleton written: {path}")
+            return ok(f"result skeleton written: {display_path(path)}")
         print(render_result_skeleton(Path.cwd(), args.case, args.order, status=args.status), end="")
     except (OSError, ValidationError) as exc:
         return fail(exc)
@@ -223,7 +229,7 @@ def cmd_result_validate(args: argparse.Namespace) -> int:
         validate_result(path)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"result valid: {path}")
+    return ok(f"result valid: {display_path(path)}")
 
 
 def cmd_review_new(args: argparse.Namespace) -> int:
@@ -240,7 +246,7 @@ def cmd_review_new(args: argparse.Namespace) -> int:
         )
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"review created: {path}")
+    return ok(f"review created: {display_path(path)}")
 
 
 def cmd_review_require(args: argparse.Namespace) -> int:
@@ -248,7 +254,7 @@ def cmd_review_require(args: argparse.Namespace) -> int:
         found = require_reviews(Path.cwd(), args.case, args.tool, strict=args.strict)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    rendered = ", ".join(f"{tool}={path}" for tool, path in sorted(found.items()))
+    rendered = ", ".join(f"{tool}={display_path(path)}" for tool, path in sorted(found.items()))
     return ok(f"reviews satisfied: {rendered}")
 
 
@@ -258,7 +264,7 @@ def cmd_review_validate(args: argparse.Namespace) -> int:
         validate_review(path, strict=args.strict)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"review valid: {path}")
+    return ok(f"review valid: {display_path(path)}")
 
 
 def cmd_review_request(args: argparse.Namespace) -> int:
@@ -266,7 +272,7 @@ def cmd_review_request(args: argparse.Namespace) -> int:
         path = new_review_request(Path.cwd(), args.case, tool=args.tool, order_id=args.order, review_id=args.review_id, force=args.force)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"review request written: {path}")
+    return ok(f"review request written: {display_path(path)}")
 
 
 def cmd_review_claude_auth(args: argparse.Namespace) -> int:
@@ -301,7 +307,7 @@ def cmd_review_claude_run(args: argparse.Namespace) -> int:
     except (OSError, ValidationError) as exc:
         return fail(exc)
     action = "review request ready" if args.dry_run else "claude review written"
-    return ok(f"{action}: {path}")
+    return ok(f"{action}: {display_path(path)}")
 
 
 def cmd_review_export(args: argparse.Namespace) -> int:
@@ -316,7 +322,7 @@ def cmd_review_export(args: argparse.Namespace) -> int:
         )
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"review bundle exported: {path}")
+    return ok(f"review bundle exported: {display_path(path)}")
 
 
 def cmd_review_import(args: argparse.Namespace) -> int:
@@ -324,7 +330,7 @@ def cmd_review_import(args: argparse.Namespace) -> int:
         path = import_review_artifact(Path.cwd(), args.case, Path(args.source), strict=args.strict, force=args.force)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"review imported: {path}")
+    return ok(f"review imported: {display_path(path)}")
 
 
 def cmd_review_status(args: argparse.Namespace) -> int:
@@ -353,7 +359,7 @@ def cmd_learning_new(args: argparse.Namespace) -> int:
         path = new_learning(Path.cwd(), args.case, args.title, source_incident=args.source_incident)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"learning created: {path}")
+    return ok(f"learning created: {display_path(path)}")
 
 
 def cmd_learning_promote(args: argparse.Namespace) -> int:
@@ -361,7 +367,7 @@ def cmd_learning_promote(args: argparse.Namespace) -> int:
         path = promote_learning(Path.cwd(), args.case, args.learning, Path(args.target), force=args.force)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"learning promoted: {path}")
+    return ok(f"learning promoted: {display_path(path)}")
 
 
 def cmd_incident_new(args: argparse.Namespace) -> int:
@@ -369,7 +375,7 @@ def cmd_incident_new(args: argparse.Namespace) -> int:
         path = new_incident(Path.cwd(), args.case, args.trigger)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"incident created: {path}")
+    return ok(f"incident created: {display_path(path)}")
 
 
 def cmd_evidence_collect(args: argparse.Namespace) -> int:
@@ -377,7 +383,7 @@ def cmd_evidence_collect(args: argparse.Namespace) -> int:
         path = collect_evidence(Path.cwd(), args.case, args.kind)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"evidence collected: {path}")
+    return ok(f"evidence collected: {display_path(path)}")
 
 
 def cmd_init(args: argparse.Namespace) -> int:

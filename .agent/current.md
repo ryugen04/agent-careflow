@@ -1,18 +1,18 @@
 # Current Agent Work
 
-workflow_root: `/home/glaucus03/dev/projects/agent-careflow`
+workflow_root: `.`
 active_case: `ACF-RELIABILITY-SUPERPOWERS`
-active_order: `ORD-023`
+active_order: `ORD-024`
 
 ## Required Handoff Header
 
 ```text
 PLAN_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md
-ORDER_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-023.order.md
-SUBPLAN_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-023.order.md
-EXPECTED_RESULT_PATH: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-023.result.md
+ORDER_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-024.order.md
+SUBPLAN_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-024.order.md
+EXPECTED_RESULT_PATH: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-024.result.md
 CASE_ID: ACF-RELIABILITY-SUPERPOWERS
-ORDER_ID: ORD-023
+ORDER_ID: ORD-024
 ASSIGNED_ROLE: <researcher|implementer|verifier|reviewer|incident-commander>
 TARGET_TOOL: <codex|claude|cursor>
 ```
@@ -22,8 +22,8 @@ TARGET_TOOL: <codex|claude|cursor>
 - Careflow index: [.careflow/INDEX.md](../.careflow/INDEX.md)
 - Case: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/CASE.yaml](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/CASE.yaml)
 - Plan: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md)
-- Order: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-023.order.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-023.order.md)
-- Expected result: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-023.result.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-023.result.md)
+- Order: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-024.order.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-024.order.md)
+- Expected result: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-024.result.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-024.result.md)
 
 ## Open Incidents
 

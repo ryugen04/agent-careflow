@@ -103,7 +103,7 @@ def render_workspace_current(cwd: Path) -> str:
     lines = [
         "# Current Agent Work",
         "",
-        f"workflow_root: `{root.as_posix()}`",
+        "workflow_root: `.`",
         f"active_case: `{paths['case_id'] or 'none'}`",
         f"active_order: `{paths['order_id'] or 'none'}`",
         "",

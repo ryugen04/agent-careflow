@@ -47,6 +47,8 @@ def test_dashboard_renders_active_handoff_and_artifact_links(tmp_path: Path) -> 
     text = render_dashboard(tmp_path)
 
     assert "# Agent Careflow Index" in text
+    assert "workflow_root: `.`" in text
+    assert str(tmp_path) not in text
     assert "PLAN_FILE: .careflow/cases/ACF-1/PLAN.md" in text
     assert "ORDER_FILE: .careflow/cases/ACF-1/orders/ORD-1.order.md" in text
     assert "EXPECTED_RESULT_PATH: .careflow/cases/ACF-1/results/ORD-1.result.md" in text

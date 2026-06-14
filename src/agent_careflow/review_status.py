@@ -26,6 +26,13 @@ def _find_latest_review(root: Path, case_id: str, tool: str) -> Path | None:
     return candidates[-1] if candidates else None
 
 
+def _display_path(root: Path, path: Path) -> str:
+    try:
+        return path.relative_to(root).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def _tool_status(root: Path, case_id: str, tool: str) -> dict[str, Any]:
     path = _find_latest_review(root, case_id, tool)
     if path is None:
@@ -33,11 +40,11 @@ def _tool_status(root: Path, case_id: str, tool: str) -> dict[str, Any]:
     try:
         validate_review(path, strict=True)
     except ValidationError as exc:
-        return {"status": "invalid", "path": path.as_posix(), "details": str(exc)}
+        return {"status": "invalid", "path": _display_path(root, path), "details": str(exc).replace(path.as_posix(), _display_path(root, path))}
     data = parse_front_matter_lines(path.read_text(encoding="utf-8"))
     if data.get("status") != "pass":
-        return {"status": "not_passing", "path": path.as_posix(), "details": f"review status is {data.get('status')}"}
-    return {"status": "satisfied", "path": path.as_posix(), "details": path.name}
+        return {"status": "not_passing", "path": _display_path(root, path), "details": f"review status is {data.get('status')}"}
+    return {"status": "satisfied", "path": _display_path(root, path), "details": path.name}
 
 
 def _next_commands(case_id: str, profile: str, order_id: str, tools: dict[str, dict[str, Any]]) -> list[str]:

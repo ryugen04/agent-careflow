@@ -41,6 +41,10 @@ def extract_tool_name(payload: dict[str, Any]) -> str:
     return str(value or "")
 
 
+def _normalized_tool_name(tool_name: str) -> str:
+    return tool_name.rsplit(".", 1)[-1].lower()
+
+
 def extract_file_path(payload: dict[str, Any]) -> str | None:
     tool_input = payload.get("tool_input")
     candidates: list[Any] = []
@@ -52,8 +56,7 @@ def extract_file_path(payload: dict[str, Any]) -> str | None:
             return candidate
     return None
 
-
-MUTATING_TOOLS = {"apply_patch", "Edit", "Write", "MultiEdit"}
+MUTATING_TOOLS = {"apply_patch", "edit", "write", "multiedit"}
 MUTATING_COMMAND_MARKERS = (
     "git add",
     "git commit",
@@ -151,12 +154,14 @@ def evaluate_pre_tool_use(payload: dict[str, Any], *, on_missing_context: str = 
                 on_missing_context=on_missing_context,
             )
         return allow("command allowed")
-    if tool_name in MUTATING_TOOLS:
+    if _normalized_tool_name(tool_name) in MUTATING_TOOLS:
         return missing_context_decision(
             payload,
             "mutating tool requires careflow case_id/order_id and a supported file path",
             on_missing_context=on_missing_context,
         )
+    if tool_name:
+        return allow("tool has no careflow policy surface")
     if on_missing_context == "deny":
         return deny("hook payload did not contain a supported command or file path")
     return allow("tool has no careflow policy surface")

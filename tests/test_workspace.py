@@ -32,6 +32,8 @@ def test_workspace_current_renders_handoff_and_agent_links(tmp_path: Path) -> No
 
     text = render_workspace_current(tmp_path)
 
+    assert "workflow_root: `.`" in text
+    assert str(tmp_path) not in text
     assert "PLAN_FILE: .careflow/cases/ACF-1/PLAN.md" in text
     assert "ORDER_FILE: .careflow/cases/ACF-1/orders/ORD-1.order.md" in text
     assert "EXPECTED_RESULT_PATH: .careflow/cases/ACF-1/results/ORD-1.result.md" in text

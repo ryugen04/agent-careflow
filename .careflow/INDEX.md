@@ -1,9 +1,9 @@
 # Agent Careflow Index
 
-workflow_root: `/home/glaucus03/dev/projects/agent-careflow`
+workflow_root: `.`
 state_file: `.careflow/state.json`
 active_case: `ACF-RELIABILITY-SUPERPOWERS`
-active_order: `ORD-023`
+active_order: `ORD-024`
 phase: `ordered`
 
 ## Active Work
@@ -12,19 +12,19 @@ phase: `ordered`
 - Title: Reliable Claude and Codex careflow orchestration
 - Risk: `C3`
 - PLAN_FILE: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md)
-- ORDER_FILE: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-023.order.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-023.order.md)
-- SUBPLAN_FILE: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-023.order.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-023.order.md)
-- EXPECTED_RESULT_PATH: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-023.result.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-023.result.md) (`exists`)
+- ORDER_FILE: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-024.order.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-024.order.md)
+- SUBPLAN_FILE: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-024.order.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-024.order.md)
+- EXPECTED_RESULT_PATH: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-024.result.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-024.result.md) (`exists`)
 
 ## Handoff Header
 
 ```text
 PLAN_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md
-ORDER_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-023.order.md
-SUBPLAN_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-023.order.md
-EXPECTED_RESULT_PATH: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-023.result.md
+ORDER_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-024.order.md
+SUBPLAN_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-024.order.md
+EXPECTED_RESULT_PATH: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-024.result.md
 CASE_ID: ACF-RELIABILITY-SUPERPOWERS
-ORDER_ID: ORD-023
+ORDER_ID: ORD-024
 ASSIGNED_ROLE: <researcher|implementer|verifier|reviewer|incident-commander>
 TARGET_TOOL: <codex|claude|cursor>
 ```
@@ -54,6 +54,7 @@ TARGET_TOOL: <codex|claude|cursor>
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-021.order.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-021.order.md)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-022.order.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-022.order.md)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-023.order.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-023.order.md)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-024.order.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-024.order.md)
 
 ## Results
 
@@ -80,6 +81,7 @@ TARGET_TOOL: <codex|claude|cursor>
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-021.result.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-021.result.md)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-022.result.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-022.result.md)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-023.result.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-023.result.md)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-024.result.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-024.result.md)
 
 ## Evidence
 
@@ -200,16 +202,42 @@ TARGET_TOOL: <codex|claude|cursor>
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-022-workspace-final.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-022-workspace-final.txt)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-022-workspace.status](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-022-workspace.status)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-022-workspace.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-022-workspace.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-dashboard-final.status](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-dashboard-final.status)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-dashboard-final.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-dashboard-final.txt)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-full-tests.status](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-full-tests.status)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-full-tests.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-full-tests.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-business-final.status](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-business-final.status)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-business-final.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-business-final.txt)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-business.status](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-business.status)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-business.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-business.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-private-final.status](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-private-final.status)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-private-final.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-private-final.txt)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-private.status](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-private.status)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-private.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-objective-matrix-private.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-order-status.status](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-order-status.status)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-order-status.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-order-status.txt)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-pr-view.json](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-pr-view.json)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-pr-view.status](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-pr-view.status)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-result-validate.status](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-result-validate.status)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-result-validate.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-result-validate.txt)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-review-status-business.status](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-review-status-business.status)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-review-status-business.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-review-status-business.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-workspace-final.status](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-workspace-final.status)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-workspace-final.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-023-workspace-final.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-claude-auth.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-claude-auth.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-claude-review-request-export.md](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-claude-review-request-export.md)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-dashboard.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-dashboard.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-doctor.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-doctor.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-focused-tests.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-focused-tests.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-full-tests.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-full-tests.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-git-status.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-git-status.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-objective-matrix-business.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-objective-matrix-business.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-objective-matrix-private.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-objective-matrix-private.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-order-status.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-order-status.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-result-validate.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-result-validate.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-review-status-business.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-review-status-business.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-review-status-private.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-review-status-private.txt)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-workspace.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-024-workspace.txt)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/git-status.txt](.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/git-status.txt)
 
 ## Open Incidents
