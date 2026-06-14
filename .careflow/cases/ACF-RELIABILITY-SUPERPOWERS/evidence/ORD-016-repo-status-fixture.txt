@@ -1,0 +1,15 @@
+# Repository Workspace
+
+workflow_root: `/tmp/agent-careflow-repo-status.oJNyA5`
+
+Canonical careflow artifacts remain under `.careflow/`; do not create case/order/result artifacts inside child repos or worktrees.
+
+## Repositories
+
+- `backend` (kind: repo)
+  - status: `git -C backend status --short`
+- `frontend` (kind: repo)
+  - status: `git -C frontend status --short`
+- `.worktrees/feature-auth/backend` (kind: worktree; branch: feature-auth)
+  - status: `git -C .worktrees/feature-auth/backend status --short`
+

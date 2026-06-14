@@ -1,0 +1,9 @@
+{
+  "cwd": "/home/glaucus03/dev/projects/agent-careflow",
+  "hook_event_name": "SessionStart",
+  "model": "gpt-test",
+  "permission_mode": "workspace-write",
+  "session_id": "test-session",
+  "source": "startup",
+  "transcript_path": "/tmp/transcript.jsonl"
+}

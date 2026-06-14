@@ -127,3 +127,15 @@ def test_old_runtime_probe_record_with_inconclusive_is_rejected(tmp_path: Path) 
         assert "unsupported schema" in str(exc)
     else:
         raise AssertionError("expected ValidationError")
+
+
+def test_codex_session_start_conformance_records_bootstrap_context() -> None:
+    record = make_record(
+        adapter="codex",
+        event="session-start",
+        fixture=FIXTURES / "codex_session_start.json",
+    )
+
+    assert record.decision["status"] == "allow"
+    assert record.rendered_output["hookSpecificOutput"]["hookEventName"] == "SessionStart"
+    assert "using-agent-careflow" in record.rendered_output["hookSpecificOutput"]["additionalContext"]

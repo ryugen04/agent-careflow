@@ -62,3 +62,9 @@ def render_stop(decision: Decision) -> str:
     if decision.status == DecisionStatus.DENY:
         return dumps({"decision": "block", "reason": decision.reason})
     return "{}"
+
+
+def render_session_start(decision: Decision) -> str:
+    if decision.status == DecisionStatus.DENY:
+        return dumps({"decision": "block", "reason": decision.reason})
+    return dumps({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": decision.reason}})

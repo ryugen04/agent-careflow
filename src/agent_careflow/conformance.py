@@ -12,6 +12,7 @@ from agent_careflow.hooks import claude, codex, cursor
 from agent_careflow.hooks.common import (
     evaluate_lifecycle_hook,
     evaluate_permission_request,
+    evaluate_session_start,
     evaluate_pre_tool_use,
     evaluate_user_prompt_submit,
     extract_command,
@@ -24,6 +25,7 @@ from agent_careflow.policy.decisions import Decision
 SCHEMA = "agent-careflow.adapter_conformance.v1"
 ADAPTERS = {"codex", "claude", "cursor"}
 EVENTS = {
+    "session-start",
     "pre-tool-use",
     "post-tool-use",
     "permission-request",
@@ -34,8 +36,8 @@ EVENTS = {
 }
 STATUSES = {"pass", "fail", "unsupported", "environment_unavailable"}
 ADAPTER_EVENTS = {
-    "codex": {"pre-tool-use", "post-tool-use", "permission-request", "user-prompt-submit", "stop"},
-    "claude": {"pre-tool-use", "post-tool-use", "stop", "subagent-start", "subagent-stop"},
+    "codex": {"session-start", "pre-tool-use", "post-tool-use", "permission-request", "user-prompt-submit", "stop"},
+    "claude": {"session-start", "pre-tool-use", "post-tool-use", "stop", "subagent-start", "subagent-stop"},
     "cursor": {"pre-tool-use", "post-tool-use", "stop"},
 }
 REQUIRED_FIELDS = {
@@ -88,6 +90,7 @@ def normalize_event(payload: dict[str, Any], *, event: str) -> dict[str, Any]:
         "case_id": context.case_id,
         "order_id": context.order_id,
         "cwd": str(context.cwd),
+        "workflow_root": str(context.workflow_root),
     }
     command = extract_command(payload)
     if command is not None:
@@ -105,8 +108,10 @@ def normalize_event(payload: dict[str, Any], *, event: str) -> dict[str, Any]:
 
 
 def evaluate_event(payload: dict[str, Any], *, event: str) -> Decision:
+    if event == "session-start":
+        return evaluate_session_start(payload)
     if event == "permission-request":
-        return evaluate_permission_request(payload, on_missing_context="deny")
+        return evaluate_permission_request(payload, on_missing_context="hybrid")
     if event == "user-prompt-submit":
         return evaluate_user_prompt_submit(payload)
     if event in {"stop", "subagent-start", "subagent-stop"}:
@@ -116,6 +121,8 @@ def evaluate_event(payload: dict[str, Any], *, event: str) -> Decision:
 
 def render_adapter_output(adapter: str, event: str, decision: Decision) -> str:
     if adapter == "codex":
+        if event == "session-start":
+            return codex.render_session_start(decision)
         if event == "permission-request":
             return codex.render_permission_request(decision)
         if event == "user-prompt-submit":
@@ -126,6 +133,8 @@ def render_adapter_output(adapter: str, event: str, decision: Decision) -> str:
             return codex.render_stop(decision)
         return codex.render_pre_tool_use(decision)
     if adapter == "claude":
+        if event == "session-start":
+            return claude.render_session_start(decision)
         if event == "post-tool-use":
             return claude.render_post_tool_use(decision)
         if event == "stop":

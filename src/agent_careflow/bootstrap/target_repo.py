@@ -34,6 +34,6 @@ def bootstrap_target_repo(*, target: Path, control_repo: Path, profile_name: str
     )
     written.append(careflow_yaml)
     state_json = careflow_dir / "state.json"
-    state_json.write_text(json.dumps({"active_case": None, "phase": "intake"}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    state_json.write_text(json.dumps({"active_case": None, "active_order": None, "expected_result_path": None, "phase": "intake"}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     written.append(state_json)
     return written

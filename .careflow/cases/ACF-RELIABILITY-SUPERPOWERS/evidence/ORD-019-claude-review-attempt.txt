@@ -1,0 +1,4 @@
+$ PYTHONPATH=src python3 -m agent_careflow.cli review claude-run --case ACF-RELIABILITY-SUPERPOWERS --order ORD-018 --review-id REVIEW-CLAUDE-ORD-018 --timeout 300
+error: claude review command failed with exit=1: Using Claude with claude-opus-4-6 and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking
+Using Claude with claude-opus-4-6 and 'thinking.type=enabled' is deprecated. Use 'thinking.type=adaptive' instead which results in better model performance in our testing: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking
+exit_status=1

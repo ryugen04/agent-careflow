@@ -1,0 +1,421 @@
+{
+  "case_id": "ACF-RELIABILITY-SUPERPOWERS",
+  "checks": [
+    {
+      "details": "checks: codex-claude-config-sources=pass: Codex and Claude hook source configs include SessionStart and Stop wiring; native-careflow-skills=pass: 14 skills available; evidence: rules/codex/hooks.json, rules/claude/settings.json, skills/",
+      "name": "objective-unified_tool_settings",
+      "status": "pass"
+    },
+    {
+      "details": "checks: case-artifact=pass: present: /home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/CASE.yaml; plan-artifact=pass: present: /home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md; careflow-dashboard-index=pass: .careflow/INDEX.md names the active case/order/result; evidence: .careflow/cases/<case_id>/PLAN.md, .careflow/INDEX.md",
+      "name": "objective-durable_planning",
+      "status": "pass"
+    },
+    {
+      "details": "checks: careflow-dashboard-index=pass: .careflow/INDEX.md names the active case/order/result; agent-workspace-current=pass: .agent/current.md names the active case/order/result; agent-workspace-support-dirs=pass: .agent support directories are present; evidence: .agent/current.md, .agent/reviews/, .agent/learnings/, .agent/incidents/",
+      "name": "objective-agent_workspace_outputs",
+      "status": "pass"
+    },
+    {
+      "details": "checks: learning-promotion=pass: promoted learning(s): LRN-001-agent-workspace-learning-promotion.md; open-incidents=pass: no open incident artifacts; runtime-residuals-clear=pass: no tracked runtime residuals remain open; evidence: .careflow/cases/<case_id>/learnings/, docs/learnings/, .careflow/cases/<case_id>/incidents/",
+      "name": "objective-troubles_and_learnings",
+      "status": "pass"
+    },
+    {
+      "details": "checks: session-start-bootstrap=pass: bootstrap names the careflow skill and fixed handoff labels; fixed-handoff-contract=pass: 18 order file(s) contain ordered fixed handoff labels; evidence: .careflow/cases/<case_id>/orders/*.order.md, agent-careflow order prompt",
+      "name": "objective-fixed_handoff_contract",
+      "status": "pass"
+    },
+    {
+      "details": "checks: fixed-handoff-contract=pass: 18 order file(s) contain ordered fixed handoff labels; careflow-dashboard-index=pass: .careflow/INDEX.md names the active case/order/result; agent-workspace-current=pass: .agent/current.md names the active case/order/result; evidence: .careflow/cases/<case_id>/orders/*.order.md, .careflow/cases/<case_id>/results/*.result.md",
+      "name": "objective-order_as_subplan",
+      "status": "pass"
+    },
+    {
+      "details": "checks: superpowers-vendored=pass: present: /home/glaucus03/dev/projects/agent-careflow/third_party/superpowers/skills/using-superpowers/SKILL.md; native-careflow-skills=pass: 14 skills available; codex-claude-config-sources=pass: Codex and Claude hook source configs include SessionStart and Stop wiring; session-start-bootstrap=pass: bootstrap names the careflow skill and fixed handoff labels; evidence: third_party/superpowers/, skills/, rules/",
+      "name": "objective-superpowers_style_enforcement",
+      "status": "pass"
+    },
+    {
+      "details": "checks: session-start-bootstrap=pass: bootstrap names the careflow skill and fixed handoff labels; codex-user-prompt-submit-coverage=pass: accepted mitigation covers non-interactive Codex exec; native status remains: runtime-observed failing UserPromptSubmit probe(s): ORD-007-user-prompt-submit-runtime-observed.jsonl:codex-exec-user-prompt-submit-inline-hook-capture; careflow-dashboard-index=pass: .careflow/INDEX.md names the active case/order/result; agent-workspace-current=pass: .agent/current.md names the active case/order/result; evidence: .careflow/cases/<case_id>/evidence/*user-prompt-submit*.jsonl, .careflow/INDEX.md, .agent/current.md",
+      "name": "objective-activation_forgetting_failure_mode",
+      "status": "pass"
+    },
+    {
+      "details": "checks: root-worktree-resolution=pass: root/worktree context resolver and tests are present; evidence: src/agent_careflow/context.py, src/agent_careflow/repo_status.py, .agent/repos.md",
+      "name": "objective-multi_repo_worktree_layout",
+      "status": "pass"
+    },
+    {
+      "details": "checks: codex-careflow-launcher-distribution=pass: install audit proves guarded launcher: ORD-010-install-audit.json; claude-careflow-launcher-distribution=pass: install audit proves guarded Claude launcher: ORD-017-install-audit-claude.json; evidence: .careflow/cases/<case_id>/evidence/*install-audit*.json, ~/.local/bin/codex-careflow, ~/.local/bin/claude-careflow",
+      "name": "objective-distribution_launchers",
+      "status": "pass"
+    },
+    {
+      "details": "checks: objective-audit-profile-status=pass: objective-audit profile=private status=pass; evidence: agent-careflow acceptance objective-audit, agent-careflow acceptance objective-matrix",
+      "name": "objective-objective_completion_audit",
+      "status": "pass"
+    },
+    {
+      "details": "checks: review-private-codex-only=pass: REVIEW-CODEX-ORD-005.review.md; evidence: .careflow/cases/<case_id>/reviews/REVIEW-CODEX-*.review.md",
+      "name": "objective-business_private_review_policy",
+      "status": "pass"
+    }
+  ],
+  "objective_audit_status": "pass",
+  "profile": "private",
+  "requirements": [
+    {
+      "check_results": [
+        {
+          "details": "Codex and Claude hook source configs include SessionStart and Stop wiring",
+          "name": "codex-claude-config-sources",
+          "status": "pass"
+        },
+        {
+          "details": "14 skills available",
+          "name": "native-careflow-skills",
+          "status": "pass"
+        }
+      ],
+      "checks": [
+        "codex-claude-config-sources",
+        "native-careflow-skills"
+      ],
+      "details": "checks: codex-claude-config-sources=pass: Codex and Claude hook source configs include SessionStart and Stop wiring; native-careflow-skills=pass: 14 skills available; evidence: rules/codex/hooks.json, rules/claude/settings.json, skills/",
+      "evidence": [
+        "rules/codex/hooks.json",
+        "rules/claude/settings.json",
+        "skills/"
+      ],
+      "id": "unified_tool_settings",
+      "requirement": "Unified Claude and Codex careflow settings, skills, hooks, and artifact locations.",
+      "status": "pass"
+    },
+    {
+      "check_results": [
+        {
+          "details": "present: /home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/CASE.yaml",
+          "name": "case-artifact",
+          "status": "pass"
+        },
+        {
+          "details": "present: /home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md",
+          "name": "plan-artifact",
+          "status": "pass"
+        },
+        {
+          "details": ".careflow/INDEX.md names the active case/order/result",
+          "name": "careflow-dashboard-index",
+          "status": "pass"
+        }
+      ],
+      "checks": [
+        "case-artifact",
+        "plan-artifact",
+        "careflow-dashboard-index"
+      ],
+      "details": "checks: case-artifact=pass: present: /home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/CASE.yaml; plan-artifact=pass: present: /home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md; careflow-dashboard-index=pass: .careflow/INDEX.md names the active case/order/result; evidence: .careflow/cases/<case_id>/PLAN.md, .careflow/INDEX.md",
+      "evidence": [
+        ".careflow/cases/<case_id>/PLAN.md",
+        ".careflow/INDEX.md"
+      ],
+      "id": "durable_planning",
+      "requirement": "Plans are deliberate, visible, durable, and stored under a predictable case directory.",
+      "status": "pass"
+    },
+    {
+      "check_results": [
+        {
+          "details": ".careflow/INDEX.md names the active case/order/result",
+          "name": "careflow-dashboard-index",
+          "status": "pass"
+        },
+        {
+          "details": ".agent/current.md names the active case/order/result",
+          "name": "agent-workspace-current",
+          "status": "pass"
+        },
+        {
+          "details": ".agent support directories are present",
+          "name": "agent-workspace-support-dirs",
+          "status": "pass"
+        }
+      ],
+      "checks": [
+        "careflow-dashboard-index",
+        "agent-workspace-current",
+        "agent-workspace-support-dirs"
+      ],
+      "details": "checks: careflow-dashboard-index=pass: .careflow/INDEX.md names the active case/order/result; agent-workspace-current=pass: .agent/current.md names the active case/order/result; agent-workspace-support-dirs=pass: .agent support directories are present; evidence: .agent/current.md, .agent/reviews/, .agent/learnings/, .agent/incidents/",
+      "evidence": [
+        ".agent/current.md",
+        ".agent/reviews/",
+        ".agent/learnings/",
+        ".agent/incidents/"
+      ],
+      "id": "agent_workspace_outputs",
+      "requirement": "Intermediate outputs are visible through .agent/.agents or canonical .careflow artifacts.",
+      "status": "pass"
+    },
+    {
+      "check_results": [
+        {
+          "details": "promoted learning(s): LRN-001-agent-workspace-learning-promotion.md",
+          "name": "learning-promotion",
+          "status": "pass"
+        },
+        {
+          "details": "no open incident artifacts",
+          "name": "open-incidents",
+          "status": "pass"
+        },
+        {
+          "details": "no tracked runtime residuals remain open",
+          "name": "runtime-residuals-clear",
+          "status": "pass"
+        }
+      ],
+      "checks": [
+        "learning-promotion",
+        "open-incidents",
+        "runtime-residuals-clear"
+      ],
+      "details": "checks: learning-promotion=pass: promoted learning(s): LRN-001-agent-workspace-learning-promotion.md; open-incidents=pass: no open incident artifacts; runtime-residuals-clear=pass: no tracked runtime residuals remain open; evidence: .careflow/cases/<case_id>/learnings/, docs/learnings/, .careflow/cases/<case_id>/incidents/",
+      "evidence": [
+        ".careflow/cases/<case_id>/learnings/",
+        "docs/learnings/",
+        ".careflow/cases/<case_id>/incidents/"
+      ],
+      "id": "troubles_and_learnings",
+      "requirement": "Troubles and lessons are persisted so another session can promote them into improvements or docs.",
+      "status": "pass"
+    },
+    {
+      "check_results": [
+        {
+          "details": "bootstrap names the careflow skill and fixed handoff labels",
+          "name": "session-start-bootstrap",
+          "status": "pass"
+        },
+        {
+          "details": "18 order file(s) contain ordered fixed handoff labels",
+          "name": "fixed-handoff-contract",
+          "status": "pass"
+        }
+      ],
+      "checks": [
+        "session-start-bootstrap",
+        "fixed-handoff-contract"
+      ],
+      "details": "checks: session-start-bootstrap=pass: bootstrap names the careflow skill and fixed handoff labels; fixed-handoff-contract=pass: 18 order file(s) contain ordered fixed handoff labels; evidence: .careflow/cases/<case_id>/orders/*.order.md, agent-careflow order prompt",
+      "evidence": [
+        ".careflow/cases/<case_id>/orders/*.order.md",
+        "agent-careflow order prompt"
+      ],
+      "id": "fixed_handoff_contract",
+      "requirement": "Claude-to-Codex, Codex-to-Claude, and subagent handoffs begin with the fixed plan/order/subplan/result header.",
+      "status": "pass"
+    },
+    {
+      "check_results": [
+        {
+          "details": "18 order file(s) contain ordered fixed handoff labels",
+          "name": "fixed-handoff-contract",
+          "status": "pass"
+        },
+        {
+          "details": ".careflow/INDEX.md names the active case/order/result",
+          "name": "careflow-dashboard-index",
+          "status": "pass"
+        },
+        {
+          "details": ".agent/current.md names the active case/order/result",
+          "name": "agent-workspace-current",
+          "status": "pass"
+        }
+      ],
+      "checks": [
+        "fixed-handoff-contract",
+        "careflow-dashboard-index",
+        "agent-workspace-current"
+      ],
+      "details": "checks: fixed-handoff-contract=pass: 18 order file(s) contain ordered fixed handoff labels; careflow-dashboard-index=pass: .careflow/INDEX.md names the active case/order/result; agent-workspace-current=pass: .agent/current.md names the active case/order/result; evidence: .careflow/cases/<case_id>/orders/*.order.md, .careflow/cases/<case_id>/results/*.result.md",
+      "evidence": [
+        ".careflow/cases/<case_id>/orders/*.order.md",
+        ".careflow/cases/<case_id>/results/*.result.md"
+      ],
+      "id": "order_as_subplan",
+      "requirement": "Each ORDER is the executable subplan and completion requires the expected RESULT path.",
+      "status": "pass"
+    },
+    {
+      "check_results": [
+        {
+          "details": "present: /home/glaucus03/dev/projects/agent-careflow/third_party/superpowers/skills/using-superpowers/SKILL.md",
+          "name": "superpowers-vendored",
+          "status": "pass"
+        },
+        {
+          "details": "14 skills available",
+          "name": "native-careflow-skills",
+          "status": "pass"
+        },
+        {
+          "details": "Codex and Claude hook source configs include SessionStart and Stop wiring",
+          "name": "codex-claude-config-sources",
+          "status": "pass"
+        },
+        {
+          "details": "bootstrap names the careflow skill and fixed handoff labels",
+          "name": "session-start-bootstrap",
+          "status": "pass"
+        }
+      ],
+      "checks": [
+        "superpowers-vendored",
+        "native-careflow-skills",
+        "codex-claude-config-sources",
+        "session-start-bootstrap"
+      ],
+      "details": "checks: superpowers-vendored=pass: present: /home/glaucus03/dev/projects/agent-careflow/third_party/superpowers/skills/using-superpowers/SKILL.md; native-careflow-skills=pass: 14 skills available; codex-claude-config-sources=pass: Codex and Claude hook source configs include SessionStart and Stop wiring; session-start-bootstrap=pass: bootstrap names the careflow skill and fixed handoff labels; evidence: third_party/superpowers/, skills/, rules/",
+      "evidence": [
+        "third_party/superpowers/",
+        "skills/",
+        "rules/"
+      ],
+      "id": "superpowers_style_enforcement",
+      "requirement": "Superpowers-style enforcement is substantially implemented rather than added as optional prose.",
+      "status": "pass"
+    },
+    {
+      "check_results": [
+        {
+          "details": "bootstrap names the careflow skill and fixed handoff labels",
+          "name": "session-start-bootstrap",
+          "status": "pass"
+        },
+        {
+          "details": "accepted mitigation covers non-interactive Codex exec; native status remains: runtime-observed failing UserPromptSubmit probe(s): ORD-007-user-prompt-submit-runtime-observed.jsonl:codex-exec-user-prompt-submit-inline-hook-capture",
+          "name": "codex-user-prompt-submit-coverage",
+          "status": "pass"
+        },
+        {
+          "details": ".careflow/INDEX.md names the active case/order/result",
+          "name": "careflow-dashboard-index",
+          "status": "pass"
+        },
+        {
+          "details": ".agent/current.md names the active case/order/result",
+          "name": "agent-workspace-current",
+          "status": "pass"
+        }
+      ],
+      "checks": [
+        "session-start-bootstrap",
+        "codex-user-prompt-submit-coverage",
+        "careflow-dashboard-index",
+        "agent-workspace-current"
+      ],
+      "details": "checks: session-start-bootstrap=pass: bootstrap names the careflow skill and fixed handoff labels; codex-user-prompt-submit-coverage=pass: accepted mitigation covers non-interactive Codex exec; native status remains: runtime-observed failing UserPromptSubmit probe(s): ORD-007-user-prompt-submit-runtime-observed.jsonl:codex-exec-user-prompt-submit-inline-hook-capture; careflow-dashboard-index=pass: .careflow/INDEX.md names the active case/order/result; agent-workspace-current=pass: .agent/current.md names the active case/order/result; evidence: .careflow/cases/<case_id>/evidence/*user-prompt-submit*.jsonl, .careflow/INDEX.md, .agent/current.md",
+      "evidence": [
+        ".careflow/cases/<case_id>/evidence/*user-prompt-submit*.jsonl",
+        ".careflow/INDEX.md",
+        ".agent/current.md"
+      ],
+      "id": "activation_forgetting_failure_mode",
+      "requirement": "Known low activation, missed recognition, and mid-session forgetting failure modes are addressed by runtime evidence and accepted boundaries.",
+      "status": "pass"
+    },
+    {
+      "check_results": [
+        {
+          "details": "root/worktree context resolver and tests are present",
+          "name": "root-worktree-resolution",
+          "status": "pass"
+        }
+      ],
+      "checks": [
+        "root-worktree-resolution"
+      ],
+      "details": "checks: root-worktree-resolution=pass: root/worktree context resolver and tests are present; evidence: src/agent_careflow/context.py, src/agent_careflow/repo_status.py, .agent/repos.md",
+      "evidence": [
+        "src/agent_careflow/context.py",
+        "src/agent_careflow/repo_status.py",
+        ".agent/repos.md"
+      ],
+      "id": "multi_repo_worktree_layout",
+      "requirement": "Root repositories and root/.worktrees/{branch}/{repo} layouts are resolved and visible.",
+      "status": "pass"
+    },
+    {
+      "check_results": [
+        {
+          "details": "install audit proves guarded launcher: ORD-010-install-audit.json",
+          "name": "codex-careflow-launcher-distribution",
+          "status": "pass"
+        },
+        {
+          "details": "install audit proves guarded Claude launcher: ORD-017-install-audit-claude.json",
+          "name": "claude-careflow-launcher-distribution",
+          "status": "pass"
+        }
+      ],
+      "checks": [
+        "codex-careflow-launcher-distribution",
+        "claude-careflow-launcher-distribution"
+      ],
+      "details": "checks: codex-careflow-launcher-distribution=pass: install audit proves guarded launcher: ORD-010-install-audit.json; claude-careflow-launcher-distribution=pass: install audit proves guarded Claude launcher: ORD-017-install-audit-claude.json; evidence: .careflow/cases/<case_id>/evidence/*install-audit*.json, ~/.local/bin/codex-careflow, ~/.local/bin/claude-careflow",
+      "evidence": [
+        ".careflow/cases/<case_id>/evidence/*install-audit*.json",
+        "~/.local/bin/codex-careflow",
+        "~/.local/bin/claude-careflow"
+      ],
+      "id": "distribution_launchers",
+      "requirement": "Dotfiles/profile distribution installs explicit guarded Codex and Claude careflow launchers without shadowing the real tools.",
+      "status": "pass"
+    },
+    {
+      "check_results": [
+        {
+          "details": "objective-audit profile=private status=pass",
+          "name": "objective-audit-profile-status",
+          "status": "pass"
+        }
+      ],
+      "checks": [
+        "objective-audit-profile-status"
+      ],
+      "details": "checks: objective-audit-profile-status=pass: objective-audit profile=private status=pass; evidence: agent-careflow acceptance objective-audit, agent-careflow acceptance objective-matrix",
+      "evidence": [
+        "agent-careflow acceptance objective-audit",
+        "agent-careflow acceptance objective-matrix"
+      ],
+      "id": "objective_completion_audit",
+      "requirement": "The original requirement can be audited end-to-end and residual limitations remain explicit.",
+      "status": "pass"
+    },
+    {
+      "check_results": [
+        {
+          "details": "REVIEW-CODEX-ORD-005.review.md",
+          "name": "review-private-codex-only",
+          "status": "pass"
+        }
+      ],
+      "checks": [
+        "review-private-codex-only"
+      ],
+      "details": "checks: review-private-codex-only=pass: REVIEW-CODEX-ORD-005.review.md; evidence: .careflow/cases/<case_id>/reviews/REVIEW-CODEX-*.review.md",
+      "evidence": [
+        ".careflow/cases/<case_id>/reviews/REVIEW-CODEX-*.review.md"
+      ],
+      "id": "business_private_review_policy",
+      "requirement": "Private/Codex-only workflows require Codex review only while preserving the same artifact contract.",
+      "status": "pass"
+    }
+  ],
+  "schema": "agent-careflow.acceptance.objective_matrix.v1",
+  "status": "pass",
+  "target": "/home/glaucus03/dev/projects/agent-careflow"
+}

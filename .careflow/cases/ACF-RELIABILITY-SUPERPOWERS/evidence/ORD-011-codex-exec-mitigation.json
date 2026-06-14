@@ -1,0 +1,21 @@
+{
+  "accepted_at": "2026-06-15T00:00:00+09:00",
+  "accepted_by": "agent-careflow objective audit policy ORD-011",
+  "case_id": "ACF-RELIABILITY-SUPERPOWERS",
+  "evidence": {
+    "launcher_distribution": ".careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-010-install-audit.json",
+    "launcher_dry_run": ".careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-010-launcher-install-evidence.md",
+    "native_failure": ".careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-007-user-prompt-submit-runtime-observed.jsonl",
+    "wrapper_preflight": ".careflow/cases/ACF-RELIABILITY-SUPERPOWERS/evidence/ORD-009-codex-wrapper-preflight.jsonl"
+  },
+  "incident_id": "INC-001-codex-exec-user-prompt-submit-not-observed",
+  "native_user_prompt_submit_status": "runtime_observed_failing",
+  "notes": "Native Codex UserPromptSubmit remains unproven for codex exec. Non-interactive Codex execution is covered only when the guarded launcher/wrapper policy is used.",
+  "policy_boundary": "non_interactive_codex_exec_must_use_guarded_launcher",
+  "required_checks": [
+    "codex-wrapper-preflight",
+    "codex-careflow-launcher-distribution"
+  ],
+  "schema": "agent-careflow.acceptance.codex_exec_mitigation.v1",
+  "status": "accepted"
+}

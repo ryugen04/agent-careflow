@@ -1,0 +1,103 @@
+fixture_home=/tmp/agent-careflow-ord-017-home.W5DWqf
+$ AGENT_CAREFLOW_REPO=/home/glaucus03/dev/projects/agent-careflow DOTFILES_TARGET_HOME=/tmp/agent-careflow-ord-017-home.W5DWqf ./install.sh -n claude
+[0;34m[INFO][0m Detected OS: linux
+[0;33m[WARN][0m Dry run mode - no changes will be made
+WARNING: in simulation mode so not modifying filesystem.
+[0;32m[OK][0m Stow ok: claude
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/brainstorming /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/brainstorming
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/brainstorming
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/dispatching-parallel-agents /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/dispatching-parallel-agents
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/dispatching-parallel-agents
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/executing-plans /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/executing-plans
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/executing-plans
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/finishing-a-development-branch /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/finishing-a-development-branch
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/finishing-a-development-branch
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/receiving-code-review /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/receiving-code-review
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/receiving-code-review
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/requesting-code-review /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/requesting-code-review
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/requesting-code-review
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/subagent-driven-development /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/subagent-driven-development
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/subagent-driven-development
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/systematic-debugging /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/systematic-debugging
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/systematic-debugging
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/test-driven-development /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/test-driven-development
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/test-driven-development
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/using-agent-careflow /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/using-agent-careflow
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/using-agent-careflow
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/using-git-worktrees /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/using-git-worktrees
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/using-git-worktrees
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/verification-before-completion /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/verification-before-completion
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/verification-before-completion
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/writing-plans /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/writing-plans
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/writing-plans
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills
+[DRY-RUN] ln -s /home/glaucus03/dev/projects/agent-careflow/skills/writing-skills /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/writing-skills
+[0;32m[OK][0m Installed link: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/writing-skills
+[DRY-RUN] mkdir -p /tmp/agent-careflow-ord-017-home.W5DWqf/.local/bin
+[DRY-RUN] install guarded Claude launcher: /tmp/agent-careflow-ord-017-home.W5DWqf/.local/bin/claude-careflow
+[0;34m[INFO][0m Dry run complete. Run without -n to apply changes.
+$ AGENT_CAREFLOW_REPO=/home/glaucus03/dev/projects/agent-careflow DOTFILES_TARGET_HOME=/tmp/agent-careflow-ord-017-home.W5DWqf ./install.sh claude
+[0;34m[INFO][0m Detected OS: linux
+[0;32m[OK][0m Stow ok: claude
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/brainstorming
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/dispatching-parallel-agents
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/executing-plans
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/finishing-a-development-branch
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/receiving-code-review
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/requesting-code-review
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/subagent-driven-development
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/systematic-debugging
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/test-driven-development
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/using-agent-careflow
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/using-git-worktrees
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/verification-before-completion
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/writing-plans
+[0;32m[OK][0m Link already installed: /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/skills/writing-skills
+[0;32m[OK][0m Installed guarded Claude launcher: /tmp/agent-careflow-ord-017-home.W5DWqf/.local/bin/claude-careflow
+[0;32m[OK][0m Done!
+$ ls -l /tmp/agent-careflow-ord-017-home.W5DWqf/.local/bin/claude-careflow
+-rwxr-xr-x 1 glaucus03 glaucus03 339 Jun 15 01:07 /tmp/agent-careflow-ord-017-home.W5DWqf/.local/bin/claude-careflow
+$ sed -n 1,12p /tmp/agent-careflow-ord-017-home.W5DWqf/.local/bin/claude-careflow
+#!/usr/bin/env bash
+# dotfiles managed claude-careflow
+set -euo pipefail
+export AGENT_CAREFLOW_REPO="/home/glaucus03/dev/projects/agent-careflow"
+if command -v agent-careflow >/dev/null 2>&1; then
+    agent-careflow dashboard --write >/dev/null 2>&1 || true
+    agent-careflow workspace --write >/dev/null 2>&1 || true
+fi
+exec claude "$@"
+$ PYTHONPATH=src python3 -m agent_careflow.cli acceptance install-audit --target-home /tmp/agent-careflow-ord-017-home.W5DWqf --tool claude
+acceptance=pass install_audit tools=claude target=/tmp/agent-careflow-ord-017-home.W5DWqf
+pass: careflow-source - source repo ready: /home/glaucus03/dev/projects/agent-careflow
+pass: claude-settings-careflow-hook - /tmp/agent-careflow-ord-017-home.W5DWqf/.claude/settings.json contains 'agent-careflow hook claude session-start'
+pass: claude-careflow-launcher - /tmp/agent-careflow-ord-017-home.W5DWqf/.local/bin/claude-careflow contains 'agent-careflow workspace --write'
+pass: claude-careflow-launcher-delegates - /tmp/agent-careflow-ord-017-home.W5DWqf/.local/bin/claude-careflow contains 'exec claude'
+pass: claude-skill-using-agent-careflow - linked to /home/glaucus03/dev/projects/agent-careflow/skills/using-agent-careflow
+pass: claude-skill-brainstorming - linked to /home/glaucus03/dev/projects/agent-careflow/skills/brainstorming
+pass: claude-skill-writing-plans - linked to /home/glaucus03/dev/projects/agent-careflow/skills/writing-plans
+pass: claude-skill-subagent-driven-development - linked to /home/glaucus03/dev/projects/agent-careflow/skills/subagent-driven-development
+pass: claude-skill-executing-plans - linked to /home/glaucus03/dev/projects/agent-careflow/skills/executing-plans
+pass: claude-skill-verification-before-completion - linked to /home/glaucus03/dev/projects/agent-careflow/skills/verification-before-completion
+pass: claude-skill-requesting-code-review - linked to /home/glaucus03/dev/projects/agent-careflow/skills/requesting-code-review
+pass: claude-skill-receiving-code-review - linked to /home/glaucus03/dev/projects/agent-careflow/skills/receiving-code-review
+pass: claude-skill-systematic-debugging - linked to /home/glaucus03/dev/projects/agent-careflow/skills/systematic-debugging
+pass: claude-skill-test-driven-development - linked to /home/glaucus03/dev/projects/agent-careflow/skills/test-driven-development
+pass: claude-skill-using-git-worktrees - linked to /home/glaucus03/dev/projects/agent-careflow/skills/using-git-worktrees
+pass: claude-skill-dispatching-parallel-agents - linked to /home/glaucus03/dev/projects/agent-careflow/skills/dispatching-parallel-agents
+pass: claude-skill-finishing-a-development-branch - linked to /home/glaucus03/dev/projects/agent-careflow/skills/finishing-a-development-branch
+pass: claude-skill-writing-skills - linked to /home/glaucus03/dev/projects/agent-careflow/skills/writing-skills

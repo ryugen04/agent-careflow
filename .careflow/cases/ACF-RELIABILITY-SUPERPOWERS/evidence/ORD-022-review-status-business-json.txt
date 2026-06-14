@@ -1,0 +1,31 @@
+{
+  "case_id": "ACF-RELIABILITY-SUPERPOWERS",
+  "diagnostic_commands": [
+    "agent-careflow review claude-auth --model sonnet"
+  ],
+  "next_commands": [
+    "agent-careflow review export --case ACF-RELIABILITY-SUPERPOWERS --tool claude --order ORD-022 --review-id REVIEW-CLAUDE-ORD-022 --output /tmp/REVIEW-CLAUDE-ORD-022.request.md",
+    "agent-careflow review import --case ACF-RELIABILITY-SUPERPOWERS --source /path/to/REVIEW-CLAUDE-ORD-022.review.md --strict --force",
+    "agent-careflow review require --case ACF-RELIABILITY-SUPERPOWERS --tool codex --tool claude --strict"
+  ],
+  "order_id": "ORD-022",
+  "profile": "business",
+  "required_tools": [
+    "codex",
+    "claude"
+  ],
+  "schema": "agent-careflow.review_status.v1",
+  "status": "missing",
+  "tools": {
+    "claude": {
+      "details": "/home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/reviews/REVIEW-CLAUDE-ORD-005.review.md: placeholder review evidence is not allowed in strict mode: placeholder",
+      "path": "/home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/reviews/REVIEW-CLAUDE-ORD-005.review.md",
+      "status": "invalid"
+    },
+    "codex": {
+      "details": "REVIEW-CODEX-ORD-005.review.md",
+      "path": "/home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/reviews/REVIEW-CODEX-ORD-005.review.md",
+      "status": "satisfied"
+    }
+  }
+}
