@@ -298,6 +298,7 @@ def require_reviews(root: Path, case_id: str, tools: list[str], *, strict: bool 
         raise ValidationError(f"case not found: {case_id}")
     reviews = cdir / "reviews"
     found: dict[str, Path] = {}
+    strict_invalid: dict[str, list[str]] = {}
     for path in sorted(reviews.glob("*.review.md")) if reviews.exists() else []:
         validate_review(path, strict=False)
         data = parse_front_matter_lines(path.read_text(encoding="utf-8"))
@@ -305,11 +306,20 @@ def require_reviews(root: Path, case_id: str, tools: list[str], *, strict: bool 
         status = str(data.get("status") or "")
         if tool in tools and status == "pass" and tool not in found:
             if strict:
-                validate_review(path, strict=True)
+                try:
+                    validate_review(path, strict=True)
+                except ValidationError as exc:
+                    strict_invalid.setdefault(tool, []).append(str(exc))
+                    continue
             found[tool] = path
     missing = [tool for tool in tools if tool not in found]
     if missing:
-        raise ValidationError(f"missing passing review(s): {', '.join(missing)}")
+        details = []
+        for tool in missing:
+            if strict_invalid.get(tool):
+                details.append(f"{tool}: {'; '.join(strict_invalid[tool])}")
+        suffix = f" ({'; '.join(details)})" if details else ""
+        raise ValidationError(f"missing passing review(s): {', '.join(missing)}{suffix}")
     return found
 
 

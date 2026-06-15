@@ -18,10 +18,10 @@ def make_case(tmp_path: Path) -> Path:
     return case
 
 
-def write_placeholder_claude(case: Path) -> None:
-    (case / "reviews" / "REVIEW-CLAUDE.review.md").write_text("""# REVIEW
+def write_placeholder_claude(case: Path, review_id: str = "REVIEW-CLAUDE") -> None:
+    (case / "reviews" / f"{review_id}.review.md").write_text(f"""# REVIEW
 
-review_id: REVIEW-CLAUDE
+review_id: {review_id}
 case_id: ACF-1
 tool: claude
 status: pass
@@ -38,6 +38,30 @@ status: pass
 
 Pass.
 """, encoding="utf-8")
+
+
+def write_valid_claude(case: Path, review_id: str = "REVIEW-CLAUDE-ORD-2") -> Path:
+    path = case / "reviews" / f"{review_id}.review.md"
+    path.write_text(f"""# REVIEW
+
+review_id: {review_id}
+case_id: ACF-1
+tool: claude
+status: pass
+
+## Findings
+
+- Severity: none; evidence.txt; concrete review evidence.
+
+## Evidence reviewed
+
+- Focused tests and result validation.
+
+## Recommendation
+
+Pass.
+""", encoding="utf-8")
+    return path
 
 
 def test_review_status_business_reports_placeholder_claude_next_steps(tmp_path: Path) -> None:
@@ -57,6 +81,21 @@ def test_review_status_business_reports_placeholder_claude_next_steps(tmp_path: 
     assert any("agent-careflow review import --case ACF-1 --source" in command for command in status["next_commands"])
     assert any("agent-careflow review require --case ACF-1 --tool codex --tool claude --strict" in command for command in status["next_commands"])
     assert status["diagnostic_commands"] == ["agent-careflow review claude-auth --model sonnet"]
+
+
+def test_review_status_business_uses_latest_valid_claude_review(tmp_path: Path) -> None:
+    case = make_case(tmp_path)
+    new_review(tmp_path, "ACF-1", tool="codex", review_id="REVIEW-CODEX")
+    write_placeholder_claude(case, "REVIEW-CLAUDE-ORD-1")
+    valid = write_valid_claude(case, "REVIEW-CLAUDE-ORD-2")
+
+    status = review_status(tmp_path, "ACF-1", profile="business", order_id="ORD-1")
+
+    assert status["status"] == "satisfied"
+    assert status["tools"]["claude"]["status"] == "satisfied"
+    assert status["tools"]["claude"]["details"] == valid.name
+    assert status["next_commands"] == []
+    assert status["diagnostic_commands"] == []
 
 
 def test_review_status_private_requires_codex_only(tmp_path: Path) -> None:

@@ -1,0 +1,3 @@
+error: <repo>/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/reviews/REVIEW-CLAUDE-ORD-024.review.md: schema REVIEW missing required field(s): review_id, case_id, status
+
+exit=1

@@ -1,6 +1,6 @@
 {
   "active_case": "ACF-RELIABILITY-SUPERPOWERS",
-  "active_order": "ORD-025",
-  "expected_result_path": ".careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-025.result.md",
+  "active_order": "ORD-026",
+  "expected_result_path": ".careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-026.result.md",
   "phase": "ordered"
 }

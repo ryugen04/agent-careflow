@@ -1,0 +1,3 @@
+discharge valid: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/DISCHARGE.md
+
+exit=0

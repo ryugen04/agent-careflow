@@ -360,6 +360,40 @@ def test_objective_audit_business_profile_requires_non_placeholder_claude_review
     assert "claude-review-not-placeholder" in failures
 
 
+def test_objective_audit_business_profile_accepts_later_strict_valid_claude_review(tmp_path: Path) -> None:
+    case_id = _write_objective_audit_fixture(tmp_path, placeholder_claude_review=True)
+    reviews = tmp_path / ".careflow" / "cases" / case_id / "reviews"
+    (reviews / "REVIEW-CLAUDE-ORD-024.review.md").write_text(
+        """# REVIEW: REVIEW-CLAUDE-ORD-024
+
+review_id: REVIEW-CLAUDE-ORD-024
+case_id: ACF-AUDIT
+tool: claude
+status: pass
+
+## Findings
+
+- Severity: none; evidence.txt; concrete review evidence.
+
+## Evidence reviewed
+
+- Focused tests and result validation.
+
+## Recommendation
+
+Pass.
+""",
+        encoding="utf-8",
+    )
+
+    report = run_objective_audit(tmp_path, case_id, profile="business")
+
+    assert report["status"] == "pass"
+    checks = {check["name"]: check for check in report["checks"]}
+    assert checks["review-dual-codex-claude"]["status"] == "pass"
+    assert checks["claude-review-not-placeholder"]["status"] == "pass"
+
+
 def test_objective_audit_private_profile_allows_codex_only_review(tmp_path: Path) -> None:
     case_id = _write_objective_audit_fixture(tmp_path, placeholder_claude_review=True)
 
@@ -476,4 +510,3 @@ def test_objective_audit_fails_when_codex_launcher_distribution_evidence_is_miss
     failures = {check["name"]: check["details"] for check in report["checks"] if check["status"] == "fail"}
     assert "codex-careflow-launcher-distribution" in failures
     assert "missing" in failures["codex-careflow-launcher-distribution"]
-

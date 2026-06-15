@@ -2,17 +2,17 @@
 
 workflow_root: `.`
 active_case: `ACF-RELIABILITY-SUPERPOWERS`
-active_order: `ORD-025`
+active_order: `ORD-026`
 
 ## Required Handoff Header
 
 ```text
 PLAN_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md
-ORDER_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-025.order.md
-SUBPLAN_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-025.order.md
-EXPECTED_RESULT_PATH: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-025.result.md
+ORDER_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-026.order.md
+SUBPLAN_FILE: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-026.order.md
+EXPECTED_RESULT_PATH: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-026.result.md
 CASE_ID: ACF-RELIABILITY-SUPERPOWERS
-ORDER_ID: ORD-025
+ORDER_ID: ORD-026
 ASSIGNED_ROLE: <researcher|implementer|verifier|reviewer|incident-commander>
 TARGET_TOOL: <codex|claude|cursor>
 ```
@@ -22,8 +22,8 @@ TARGET_TOOL: <codex|claude|cursor>
 - Careflow index: [.careflow/INDEX.md](../.careflow/INDEX.md)
 - Case: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/CASE.yaml](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/CASE.yaml)
 - Plan: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md)
-- Order: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-025.order.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-025.order.md)
-- Expected result: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-025.result.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-025.result.md)
+- Order: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-026.order.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/orders/ORD-026.order.md)
+- Expected result: [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-026.result.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-026.result.md)
 
 ## Open Incidents
 
@@ -32,6 +32,7 @@ TARGET_TOOL: <codex|claude|cursor>
 ## Reviews
 
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/reviews/REVIEW-CLAUDE-ORD-005.review.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/reviews/REVIEW-CLAUDE-ORD-005.review.md)
+- [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/reviews/REVIEW-CLAUDE-ORD-024.review.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/reviews/REVIEW-CLAUDE-ORD-024.review.md)
 - [.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/reviews/REVIEW-CODEX-ORD-005.review.md](../.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/reviews/REVIEW-CODEX-ORD-005.review.md)
 
 ## Learnings

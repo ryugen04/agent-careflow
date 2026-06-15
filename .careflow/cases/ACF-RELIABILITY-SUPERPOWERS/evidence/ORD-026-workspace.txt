@@ -1,0 +1,3 @@
+workspace written: 6 file(s)
+
+exit=0

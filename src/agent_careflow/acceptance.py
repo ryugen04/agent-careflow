@@ -9,7 +9,7 @@ from agent_careflow.artifacts import ValidationError, parse_front_matter_lines
 from agent_careflow.bootstrap.profiles import render_profile, validate_profile
 from agent_careflow.bootstrap_context import bootstrap_context
 from agent_careflow.artifacts import validate_case, validate_order, validate_plan
-from agent_careflow.lifecycle import issue_order, require_reviews, validate_result
+from agent_careflow.lifecycle import issue_order, require_reviews, validate_result, validate_review
 from agent_careflow.orders import render_order_prompt, write_result_skeleton
 from agent_careflow.templates import render_case, render_discharge, render_plan
 
@@ -642,11 +642,23 @@ def _check_reviews(control_repo: Path, case_id: str, *, profile: str) -> list[Ac
     if not claude_texts:
         checks.append(AcceptanceCheck("claude-review-not-placeholder", "fail", "missing Claude review artifact"))
     else:
-        placeholder_paths = [path.name for text, path in claude_texts if any(token in text.lower() for token in PLACEHOLDER_REVIEW_TOKENS)]
-        if placeholder_paths:
-            checks.append(AcceptanceCheck("claude-review-not-placeholder", "fail", f"placeholder/auth-unavailable review(s): {', '.join(placeholder_paths)}"))
+        valid_paths: list[str] = []
+        invalid_details: list[str] = []
+        for text, path in claude_texts:
+            data = parse_front_matter_lines(text)
+            if data.get("status") != "pass":
+                continue
+            try:
+                validate_review(path, strict=True)
+            except ValidationError as exc:
+                invalid_details.append(f"{path.name}: {exc}")
+                continue
+            valid_paths.append(path.name)
+        if valid_paths:
+            checks.append(AcceptanceCheck("claude-review-not-placeholder", "pass", f"strict-valid Claude review artifact(s): {', '.join(valid_paths)}"))
         else:
-            checks.append(AcceptanceCheck("claude-review-not-placeholder", "pass", "Claude review artifact is not a placeholder/auth-unavailable record"))
+            detail = "; ".join(invalid_details) if invalid_details else "no passing strict-valid Claude review artifact"
+            checks.append(AcceptanceCheck("claude-review-not-placeholder", "fail", detail))
     return checks
 
 

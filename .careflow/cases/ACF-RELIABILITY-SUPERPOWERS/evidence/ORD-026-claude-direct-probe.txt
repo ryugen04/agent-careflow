@@ -1,0 +1,3 @@
+agent-careflow-claude-auth-ok
+
+exit=0

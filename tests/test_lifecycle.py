@@ -235,3 +235,51 @@ status: pass
     found = require_reviews(tmp_path, "ACF-1", ["codex"], strict=True)
     assert found["codex"] == codex
 
+
+def test_review_require_strict_skips_invalid_candidate_when_later_review_is_valid(tmp_path: Path) -> None:
+    case = make_case(tmp_path)
+    codex = new_review(tmp_path, "ACF-1", tool="codex", review_id="REVIEW-CODEX")
+    (case / "reviews" / "REVIEW-CLAUDE-ORD-001.review.md").write_text("""# REVIEW
+
+review_id: REVIEW-CLAUDE-ORD-001
+case_id: ACF-1
+tool: claude
+status: pass
+
+## Findings
+
+- None.
+
+## Evidence reviewed
+
+- Artifact-level review placeholder because local Claude auth is unavailable.
+
+## Recommendation
+
+Pass.
+""", encoding="utf-8")
+    valid = case / "reviews" / "REVIEW-CLAUDE-ORD-002.review.md"
+    valid.write_text("""# REVIEW
+
+review_id: REVIEW-CLAUDE-ORD-002
+case_id: ACF-1
+tool: claude
+status: pass
+
+## Findings
+
+- Severity: none; evidence.txt; concrete review evidence.
+
+## Evidence reviewed
+
+- Focused tests and result validation.
+
+## Recommendation
+
+Pass.
+""", encoding="utf-8")
+
+    found = require_reviews(tmp_path, "ACF-1", ["codex", "claude"], strict=True)
+
+    assert found["codex"] == codex
+    assert found["claude"] == valid
