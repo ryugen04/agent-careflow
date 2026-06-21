@@ -94,9 +94,11 @@ Execution rules:
 - Report blockers explicitly in the expected result file.
 
 Kitty/agmsg lane:
-- Start a kitty controller/worker tab with: `careflow-kitty-start --case {case_id} --order {data['order_id']} --controller claude --worker {tool}`
-- Use `--controller codex` when Codex should own planning.
+- From the existing controller pane, bind the case/order with: `careflow-kitty-start --case {case_id} --order {data['order_id']} --worker {tool}`
+- Do not open a replacement controller tab; the current pane remains controller/planner.
 - After PLAN/ORDER approval and explicit go, send work with: `careflow-kitty-go --case {case_id} --order {data['order_id']}`
+- `careflow-kitty-go` resolves the right worker pane: reuse a marked worker, start {tool} in an idle right shell, or open a right split when missing.
+- Unsafe existing right panes are refused instead of receiving the handoff.
 - If blocked, record and notify the controller with: `careflow-escalate-left --case {case_id} --order {data['order_id']} --blocker "<one sentence>" --decision-needed "<one sentence>"`
 - agmsg files live under `.careflow/cases/{case_id}/messages/`; do not replace PLAN, ORDER, RESULT, Evidence, or Incident artifacts.
 - Do not use cmux for careflow agent handoff.
