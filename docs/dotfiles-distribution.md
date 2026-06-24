@@ -27,6 +27,8 @@ A target repository owns only runtime artifacts under `.careflow/`:
 
 Target repositories must not receive `.codex/`, `.claude/`, `.cursor/`, `.agents/`, or `.aidlc/` from careflow bootstrap.
 
+A target repository may contain generated `.agent/` operator indexes. `.agent/` is not a tool configuration directory and must remain derived from `.careflow/`; deleting and regenerating it must not lose canonical case data.
+
 ## Distribution Shape
 
 The intended install flow is:
@@ -47,18 +49,19 @@ Old dotfiles content should be treated as legacy:
 - `packages/codex/.codex/templates/careflow`, `packages/codex/.codex/templates/project-AGENTS.md`, and project bootstrap commands that copy `.codex/` or `.aidlc/` into target repos should be removed.
 - `packages/codex/.codex/hooks.json` should not be an independent copy. Dotfiles should link the user's global hook config to `agent-careflow/rules/codex/hooks.json`, or generate a minimal wrapper that delegates to `agent-careflow` without embedding policy.
 - `packages/codex/.codex/rules/careflow.rules` should be removed unless it remains a narrow sandbox escalation policy. State-aware careflow decisions belong in hooks and policy YAML, not in `.rules`.
-- `packages/agents/.agents/skills` is optional user tooling. It is not required by careflow and should be kept only if it is intentionally maintained as separate Codex authoring help.
+- `packages/agents/.agents/skills` may keep independent Codex authoring help, but agent-careflow runtime skills must be installed from the central `agent-careflow/skills` directory as user-level `.agents/skills/<skill>` links or rendered profile files. Do not maintain separate copied careflow skill bodies in dotfiles.
+- `packages/claude/.claude/skills` may keep independent Claude skills, but careflow runtime skills must be linked or rendered from the central `agent-careflow/skills` directory as `.claude/skills/<skill>` entries when Claude is enabled.
 
 ## Codex Hook Event Matrix
 
 | Event | Global adapter action | Missing `.careflow/` behavior | Reason |
 | --- | --- | --- | --- |
 | `UserPromptSubmit` | Run prompt guard through `agent-careflow hook codex user-prompt-submit`. | Still run prompt guard. | Secret and PHI-like prompt checks are useful before repository context is known. |
-| `PreToolUse` | Run command/file policy through `agent-careflow hook codex pre-tool-use`. | Warn only. | Read and low-risk work should not be blocked outside bootstrapped repos. |
-| `PermissionRequest` | Run escalation policy through `agent-careflow hook codex permission-request`. | Deny by default. | Escalated actions without case context should be explicit and conservative. |
+| `PreToolUse` | Run command/file policy through `agent-careflow hook codex pre-tool-use`. | Hybrid gate. | Read and low-risk work can continue; mutating writes and order-scoped file changes require careflow context. |
+| `PermissionRequest` | Run escalation policy through `agent-careflow hook codex permission-request`. | Hybrid gate. | Conversation can warn, but mutating escalation without careflow context is denied unless the user explicitly requests a one-turn bypass. |
 | `PostToolUse` | Capture evidence/checkpoints through `agent-careflow hook codex post-tool-use`. | Warn only. | Post hooks cannot undo tool effects; they should report missing context. |
 
-`SessionStart` stays out of the default Codex adapter until a fixture and adapter contract are defined. `Stop` can be represented by fixture replay and conformance records; live CLI execution is optional runtime compatibility evidence rather than a bootstrap prerequisite.
+`SessionStart` is part of the default Codex adapter. It injects the `using-agent-careflow` bootstrap context so agents do not rely on memory to discover the workflow. Native skill discovery is a second required path: Codex must see `.agents/skills`, and Claude-enabled profiles must see `.claude/skills`, both sourced from the central `agent-careflow/skills` directory. `Stop` remains JSON-only and blocks completion claims when expected result/evidence is missing.
 
 ## Parent Repository and Worktree Model
 

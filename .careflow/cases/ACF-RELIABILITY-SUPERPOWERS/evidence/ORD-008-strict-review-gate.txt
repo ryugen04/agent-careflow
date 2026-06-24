@@ -1,0 +1,7 @@
+$ PYTHONPATH=src python -m agent_careflow.cli review validate --case ACF-RELIABILITY-SUPERPOWERS --review REVIEW-CLAUDE-ORD-005.review.md --strict
+exit=1
+error: REVIEW-CLAUDE-ORD-005.review.md placeholder review evidence is not allowed in strict mode: placeholder
+
+$ PYTHONPATH=src python -m agent_careflow.cli review require --case ACF-RELIABILITY-SUPERPOWERS --tool codex --tool claude --strict
+exit=1
+error: REVIEW-CLAUDE-ORD-005.review.md placeholder review evidence is not allowed in strict mode: placeholder

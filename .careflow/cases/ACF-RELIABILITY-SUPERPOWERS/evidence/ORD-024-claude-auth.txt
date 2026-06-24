@@ -1,0 +1,1 @@
+claude-auth=fail model=sonnet fallback_used=false exit=1 details=Not logged in · Please run /login

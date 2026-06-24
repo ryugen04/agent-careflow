@@ -71,6 +71,10 @@ agent-careflow/
 
 Target repositories own runtime artifacts only under `.careflow/`.
 
+The visible runtime entrypoint is `.careflow/INDEX.md`. It is generated from the artifact set and should name the active case, `PLAN_FILE`, `ORDER_FILE`, `SUBPLAN_FILE`, `EXPECTED_RESULT_PATH`, open incidents, reviews, learnings, and next step. This gives human operators and later agent sessions a stable place to resume without reconstructing state from chat history.
+
+For ergonomics, `.agent/` may be generated as an operator workspace that points back to `.careflow/`. It is intentionally a derived alias, not canonical state. This separates user-facing resume files from tool-specific `.agents/skills` used by Codex skill discovery.
+
 ## PLAN / ORDER Separation
 
 `PLAN.md` is case-level intent. It contains objective, non-goals, acceptance criteria, risk class, allowed scope, phase plan, evidence requirements, rollback plan, and unresolved questions.
@@ -143,6 +147,8 @@ An incident is not only a production outage. In AI-agent work, incidents include
 
 Incidents are learning artifacts. They should create correction and review, not disappear into chat history.
 
+Learning artifacts can be promoted into reader-facing docs with source traceability. The promoted docs are derived outputs; the canonical lesson remains in `.careflow/cases/<case_id>/learnings/` so later agents can audit why the documentation or workflow changed.
+
 ## Closure Philosophy
 
 A case is not done because an agent says it is done. It is done when closure criteria pass:
@@ -150,6 +156,8 @@ A case is not done because an agent says it is done. It is done when closure cri
 - expected results exist
 - required evidence exists
 - reviews are complete for the risk class
+
+Business profiles can require dual review by Codex and Claude. Private/Codex-only profiles can require Codex review only. In both modes, review is a `.careflow/cases/<case_id>/reviews/*.review.md` artifact with a tool identity and status, not a chat-only approval.
 - no blocking incident is open
 - discharge/close validation passes
 

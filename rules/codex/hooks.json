@@ -4,11 +4,13 @@
       {
         "hooks": [
           {
-            "command": "agent-careflow hook codex permission-request --on-missing-context deny",
+            "command": "agent-careflow hook codex permission-request --on-missing-context hybrid --incident-on-deny",
+            "statusMessage": "Checking careflow approval",
+            "timeout": 30,
             "type": "command"
           }
         ],
-        "matcher": "Bash|apply_patch|.*"
+        "matcher": "Bash|apply_patch|Edit|Write|MultiEdit|.*"
       }
     ],
     "PostToolUse": [
@@ -16,28 +18,47 @@
         "hooks": [
           {
             "command": "agent-careflow hook codex post-tool-use --on-missing-context warn",
+            "statusMessage": "Recording careflow context",
+            "timeout": 30,
             "type": "command"
           }
         ],
-        "matcher": "Bash|apply_patch|.*"
+        "matcher": "Bash|apply_patch|Edit|Write|MultiEdit|.*"
       }
     ],
     "PreToolUse": [
       {
         "hooks": [
           {
-            "command": "agent-careflow hook codex pre-tool-use --on-missing-context warn",
+            "command": "agent-careflow hook codex pre-tool-use --on-missing-context hybrid --incident-on-deny",
+            "statusMessage": "Checking careflow scope",
+            "timeout": 30,
             "type": "command"
           }
         ],
-        "matcher": "Bash|apply_patch|.*"
+        "matcher": "Bash|apply_patch|Edit|Write|MultiEdit|.*"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "agent-careflow hook codex session-start",
+            "statusMessage": "Loading agent-careflow",
+            "timeout": 30,
+            "type": "command"
+          }
+        ],
+        "matcher": "startup|resume|clear"
       }
     ],
     "Stop": [
       {
         "hooks": [
           {
-            "command": "agent-careflow hook codex stop",
+            "command": "agent-careflow hook codex stop --incident-on-deny",
+            "statusMessage": "Checking careflow completion",
+            "timeout": 30,
             "type": "command"
           }
         ]
@@ -48,6 +69,8 @@
         "hooks": [
           {
             "command": "agent-careflow hook codex user-prompt-submit",
+            "statusMessage": "Checking prompt",
+            "timeout": 30,
             "type": "command"
           }
         ]

@@ -1,0 +1,3 @@
+result valid: .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/results/ORD-026.result.md
+
+exit=0

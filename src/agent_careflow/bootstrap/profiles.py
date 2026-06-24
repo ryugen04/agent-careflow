@@ -39,6 +39,20 @@ def load_profile(control_repo: Path, name: str) -> Profile:
 TOOLS = ("codex", "claude", "cursor")
 
 
+def _skill_sources(control_repo: Path) -> list[Path]:
+    skills_source = control_repo / "skills"
+    if not skills_source.exists():
+        return []
+    return sorted(skills_source.glob("*/SKILL.md"))
+
+
+def _copy_skill(source: Path, destination_root: Path, rendered: list[Path]) -> None:
+    destination = destination_root / source.parent.name / "SKILL.md"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, destination)
+    rendered.append(destination)
+
+
 def validate_profile(control_repo: Path, name: str) -> Profile:
     profile = load_profile(control_repo, name)
     if profile.name != name:
@@ -80,6 +94,15 @@ def render_profile(control_repo: Path, profile: Profile, target: Path) -> list[P
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, destination)
         rendered.append(destination)
+    skill_roots = [target / "skills"]
+    if profile.codex:
+        skill_roots.append(target / ".agents" / "skills")
+    if profile.claude:
+        skill_roots.append(target / ".claude" / "skills")
+    for source in _skill_sources(control_repo):
+        for skill_root in skill_roots:
+            _copy_skill(source, skill_root, rendered)
+
     manifest = target / "profile.json"
     manifest.parent.mkdir(parents=True, exist_ok=True)
     manifest.write_text(
@@ -87,6 +110,11 @@ def render_profile(control_repo: Path, profile: Profile, target: Path) -> list[P
             {
                 "profile": profile.name,
                 "tools": {"codex": profile.codex, "claude": profile.claude, "cursor": profile.cursor},
+                "skill_roots": [
+                    "skills",
+                    *( [".agents/skills"] if profile.codex else [] ),
+                    *( [".claude/skills"] if profile.claude else [] ),
+                ],
             },
             indent=2,
             sort_keys=True,

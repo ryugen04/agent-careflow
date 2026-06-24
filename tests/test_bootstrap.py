@@ -63,3 +63,30 @@ def test_install_profile_applies_tool_overrides(tmp_path: Path) -> None:
     assert tmp_path / "install" / "codex-only" / "codex" / "hooks.json" in written
     assert tmp_path / "install" / "codex-only" / "cursor" / "hooks.json" in written
     assert not (tmp_path / "install" / "codex-only" / "claude").exists()
+
+
+def test_profile_render_writes_native_skills(tmp_path: Path) -> None:
+    profile = validate_profile(Path.cwd(), "codex-only")
+
+    written = render_profile(Path.cwd(), profile, tmp_path / "rendered")
+
+    assert tmp_path / "rendered" / "skills" / "using-agent-careflow" / "SKILL.md" in written
+    assert tmp_path / "rendered" / "skills" / "brainstorming" / "SKILL.md" in written
+    assert tmp_path / "rendered" / "skills" / "subagent-driven-development" / "SKILL.md" in written
+    assert tmp_path / "rendered" / ".agents" / "skills" / "using-agent-careflow" / "SKILL.md" in written
+    assert tmp_path / "rendered" / ".agents" / "skills" / "writing-plans" / "SKILL.md" in written
+    assert not (tmp_path / "rendered" / ".claude" / "skills").exists()
+    rendered_skills = sorted((tmp_path / "rendered" / "skills").glob("*/SKILL.md"))
+    rendered_codex_skills = sorted((tmp_path / "rendered" / ".agents" / "skills").glob("*/SKILL.md"))
+    assert len(rendered_skills) >= 14
+    assert len(rendered_codex_skills) == len(rendered_skills)
+
+
+def test_profile_render_writes_claude_skill_root_when_enabled(tmp_path: Path) -> None:
+    profile = validate_profile(Path.cwd(), "business")
+
+    written = render_profile(Path.cwd(), profile, tmp_path / "rendered")
+
+    assert tmp_path / "rendered" / ".agents" / "skills" / "using-agent-careflow" / "SKILL.md" in written
+    assert tmp_path / "rendered" / ".claude" / "skills" / "using-agent-careflow" / "SKILL.md" in written
+    assert tmp_path / "rendered" / ".claude" / "skills" / "subagent-driven-development" / "SKILL.md" in written

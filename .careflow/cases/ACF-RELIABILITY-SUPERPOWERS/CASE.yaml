@@ -1,0 +1,10 @@
+case_id: ACF-RELIABILITY-SUPERPOWERS
+title: Reliable Claude and Codex careflow orchestration
+risk: C3
+phase: intake
+status: active
+created_at: 2026-06-14T23:02:03+09:00
+owner: codex
+allowed_scope:
+  - .careflow/**
+summary: Reliable Claude and Codex careflow orchestration

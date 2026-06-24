@@ -1,0 +1,26 @@
+acceptance=fail objective-audit case=ACF-RELIABILITY-SUPERPOWERS profile=business target=/home/glaucus03/dev/projects/agent-careflow
+pass: case-artifact - present: /home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/CASE.yaml
+pass: plan-artifact - present: /home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/PLAN.md
+pass: superpowers-vendored - present: /home/glaucus03/dev/projects/agent-careflow/third_party/superpowers/skills/using-superpowers/SKILL.md
+pass: native-careflow-skills - 14 skills available
+pass: codex-claude-config-sources - Codex and Claude hook source configs include SessionStart and Stop wiring
+pass: session-start-bootstrap - bootstrap names the careflow skill and fixed handoff labels
+pass: fixed-handoff-contract - 19 order file(s) contain ordered fixed handoff labels
+pass: root-worktree-resolution - root/worktree context resolver and tests are present
+pass: install-and-runtime-evidence - result files record install audit and live Codex/Claude transcript evidence
+fail: codex-user-prompt-submit-proof - runtime-observed failing UserPromptSubmit probe(s): ORD-007-user-prompt-submit-runtime-observed.jsonl:codex-exec-user-prompt-submit-inline-hook-capture
+pass: codex-wrapper-preflight - wrapper blocked rejected prompt before Codex invocation: ORD-009-codex-wrapper-preflight.jsonl:agent-careflow-codex-wrapper-preflight
+pass: codex-careflow-launcher-distribution - install audit proves guarded launcher: ORD-010-install-audit.json
+pass: claude-careflow-launcher-distribution - install audit proves guarded Claude launcher: ORD-017-install-audit-claude.json
+pass: codex-exec-mitigation-acceptance - accepted guarded launcher policy: ORD-011-codex-exec-mitigation.json
+pass: codex-user-prompt-submit-coverage - accepted mitigation covers non-interactive Codex exec; native status remains: runtime-observed failing UserPromptSubmit probe(s): ORD-007-user-prompt-submit-runtime-observed.jsonl:codex-exec-user-prompt-submit-inline-hook-capture
+pass: careflow-dashboard-index - .careflow/INDEX.md names the active case/order/result
+pass: agent-workspace-current - .agent/current.md names the active case/order/result
+pass: agent-workspace-support-dirs - .agent support directories are present
+pass: learning-promotion - promoted learning(s): LRN-001-agent-workspace-learning-promotion.md
+fail: review-dual-codex-claude - /home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/reviews/REVIEW-CLAUDE-ORD-005.review.md: placeholder review evidence is not allowed in strict mode: placeholder
+pass: review-private-codex-only - REVIEW-CODEX-ORD-005.review.md
+fail: claude-review-not-placeholder - placeholder/auth-unavailable review(s): REVIEW-CLAUDE-ORD-005.review.md
+pass: open-incidents - no open incident artifacts
+pass: codex-user-prompt-submit-residual - no UserPromptSubmit residual incident recorded
+pass: runtime-residuals-clear - no tracked runtime residuals remain open

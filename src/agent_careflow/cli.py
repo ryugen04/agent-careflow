@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
 from .artifacts import ValidationError, case_dir, sha256_file, validate_case, validate_discharge, validate_order, validate_plan, validate_research, write_plan_lock
 from .constants import CASES_DIR, RISK_CLASSES
+from .context import write_state
 from .policy.engine import PolicyEngine
-from .hooks.common import evaluate_lifecycle_hook, evaluate_permission_request, evaluate_pre_tool_use, evaluate_user_prompt_submit, load_payload, record_hook_incident
+from .hooks.common import evaluate_lifecycle_hook, evaluate_permission_request, evaluate_pre_tool_use, evaluate_session_start, evaluate_user_prompt_submit, load_payload, record_hook_incident
 from .hooks import claude as claude_hooks
 from .hooks import codex as codex_hooks
 from .hooks import cursor as cursor_hooks
@@ -17,11 +19,19 @@ from .research import scaffold_research
 from .templates import render_case, render_discharge, render_plan
 from .bootstrap.target_repo import bootstrap_target_repo
 from .bootstrap.profiles import install_profile, render_profile, validate_profile
-from .lifecycle import advance_phase, case_status, collect_evidence, issue_order, new_incident, validate_result, validate_review
-from .orders import order_status, render_order_prompt
+from .lifecycle import advance_phase, case_status, collect_evidence, issue_order, new_incident, new_learning, new_review, new_review_request, promote_learning, require_reviews, validate_result, validate_review
+from .claude_review import check_claude_auth, render_claude_auth_report, run_claude_review
+from .review_exchange import export_review_bundle, import_review_artifact
+from .review_status import render_review_status, review_status
+from .repo_status import discover_repositories, render_repo_status
+from .orders import order_status, render_order_prompt, render_result_skeleton, write_result_skeleton
 from .isolation import cleanup_isolation, create_isolation, export_isolation_patch, plan_isolation, render_isolation_plan
 from .takt import analyze_takt_workflow, render_takt_analysis, render_takt_import, render_takt_policy_export
 from .doctor import doctor_failed, render_doctor, run_doctor
+from .dashboard import render_dashboard, write_dashboard
+from .workspace import render_workspace_current, write_workspace
+from .acceptance import ensure_acceptance_passed, render_acceptance_report, run_handoff_acceptance, run_install_audit, run_live_claude_transcript_acceptance, run_live_codex_transcript_acceptance, run_objective_audit, run_objective_matrix, run_profile_acceptance, run_transcript_acceptance_from_file, run_transcript_acceptance_from_text
+from .codex_wrapper import run_guarded_codex_exec
 
 
 def ok(message: str) -> int:
@@ -33,6 +43,34 @@ def fail(error: Exception | str) -> int:
     print(f"error: {error}", file=sys.stderr)
     return 1
 
+
+def display_path(path: Path, *, root: Path | None = None) -> str:
+    base = (root or Path.cwd()).resolve()
+    try:
+        return path.resolve().relative_to(base).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def cmd_workspace(args: argparse.Namespace) -> int:
+    try:
+        if args.write:
+            written = write_workspace(Path.cwd())
+            return ok(f"workspace written: {len(written)} file(s)")
+        print(render_workspace_current(Path.cwd()), end="")
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return 0
+
+def cmd_dashboard(args: argparse.Namespace) -> int:
+    try:
+        if args.write:
+            output = write_dashboard(Path.cwd(), Path(args.output) if args.output else None)
+            return ok(f"dashboard written: {display_path(output)}")
+        print(render_dashboard(Path.cwd()), end="")
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return 0
 
 def cmd_doctor(args: argparse.Namespace) -> int:
     checks = run_doctor(Path.cwd())
@@ -67,11 +105,13 @@ def cmd_case_new(args: argparse.Namespace) -> int:
     (root / "evidence").mkdir()
     (root / "incidents").mkdir()
     (root / "reviews").mkdir()
+    (root / "learnings").mkdir()
     (root / "conferences").mkdir()
     (root / "CASE.yaml").write_text(render_case(case_id, args.title, risk), encoding="utf-8")
     (root / "PLAN.md").write_text(render_plan(case_id, args.title, risk), encoding="utf-8")
     (root / "DISCHARGE.md").write_text(render_discharge(case_id), encoding="utf-8")
     try:
+        write_state(Path.cwd(), {"active_case": case_id, "active_order": None, "expected_result_path": None, "phase": "planning"})
         validate_case(root / "CASE.yaml")
         validate_plan(root / "PLAN.md")
     except ValidationError as exc:
@@ -85,7 +125,7 @@ def cmd_plan_validate(args: argparse.Namespace) -> int:
         validate_plan(path, require_lock=args.require_lock, require_signature=args.require_signature, allowed_signers=Path(args.allowed_signers) if args.allowed_signers else None, signing_principal=args.signing_principal)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"plan valid: {path}")
+    return ok(f"plan valid: {display_path(path)}")
 
 
 def cmd_hash_plan(args: argparse.Namespace) -> int:
@@ -93,7 +133,7 @@ def cmd_hash_plan(args: argparse.Namespace) -> int:
     try:
         if args.write_lock:
             lock_path = write_plan_lock(path, signing_key=Path(args.signing_key) if args.signing_key else None, signing_principal=args.signing_principal)
-            return ok(f"plan lock written: {lock_path}")
+            return ok(f"plan lock written: {display_path(lock_path)}")
         print(sha256_file(path))
     except (OSError, ValidationError) as exc:
         return fail(exc)
@@ -109,7 +149,7 @@ def cmd_order_validate(args: argparse.Namespace) -> int:
         validate_order(path, Path.cwd())
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"order valid: {path}")
+    return ok(f"order valid: {display_path(path)}")
 
 
 def cmd_discharge_validate(args: argparse.Namespace) -> int:
@@ -119,7 +159,7 @@ def cmd_discharge_validate(args: argparse.Namespace) -> int:
         validate_discharge(path, root)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"discharge valid: {path}")
+    return ok(f"discharge valid: {display_path(path)}")
 
 
 def cmd_close_validate(args: argparse.Namespace) -> int:
@@ -146,10 +186,12 @@ def cmd_phase_advance(args: argparse.Namespace) -> int:
 def cmd_order_issue(args: argparse.Namespace) -> int:
     try:
         path = issue_order(Path.cwd(), args.case, args.order, args.role)
+        result_path = Path(".careflow") / "cases" / args.case / "results" / f"{args.order}.result.md"
+        write_state(Path.cwd(), {"active_case": args.case, "active_order": args.order, "expected_result_path": result_path.as_posix(), "phase": "ordered"})
         validate_order(path, Path.cwd())
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"order issued: {path}")
+    return ok(f"order issued: {display_path(path)}")
 
 
 def cmd_order_prompt(args: argparse.Namespace) -> int:
@@ -170,22 +212,162 @@ def cmd_order_status(args: argparse.Namespace) -> int:
     return 0 if status["complete"] else 1
 
 
+def cmd_order_result_skeleton(args: argparse.Namespace) -> int:
+    try:
+        if args.write:
+            path = write_result_skeleton(Path.cwd(), args.case, args.order, force=args.force, status=args.status)
+            return ok(f"result skeleton written: {display_path(path)}")
+        print(render_result_skeleton(Path.cwd(), args.case, args.order, status=args.status), end="")
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return 0
+
+
 def cmd_result_validate(args: argparse.Namespace) -> int:
     path = case_dir(Path.cwd(), args.case) / "results" / args.result
     try:
         validate_result(path)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"result valid: {path}")
+    return ok(f"result valid: {display_path(path)}")
+
+
+def cmd_review_new(args: argparse.Namespace) -> int:
+    try:
+        path = new_review(
+            Path.cwd(),
+            args.case,
+            tool=args.tool,
+            review_id=args.review_id,
+            status=args.status,
+            scope=args.scope,
+            evidence=args.evidence,
+            recommendation=args.recommendation,
+        )
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return ok(f"review created: {display_path(path)}")
+
+
+def cmd_review_require(args: argparse.Namespace) -> int:
+    try:
+        found = require_reviews(Path.cwd(), args.case, args.tool, strict=args.strict)
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    rendered = ", ".join(f"{tool}={display_path(path)}" for tool, path in sorted(found.items()))
+    return ok(f"reviews satisfied: {rendered}")
 
 
 def cmd_review_validate(args: argparse.Namespace) -> int:
     path = case_dir(Path.cwd(), args.case) / "reviews" / args.review
     try:
-        validate_review(path)
+        validate_review(path, strict=args.strict)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"review valid: {path}")
+    return ok(f"review valid: {display_path(path)}")
+
+
+def cmd_review_request(args: argparse.Namespace) -> int:
+    try:
+        path = new_review_request(Path.cwd(), args.case, tool=args.tool, order_id=args.order, review_id=args.review_id, force=args.force)
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return ok(f"review request written: {display_path(path)}")
+
+
+def cmd_review_claude_auth(args: argparse.Namespace) -> int:
+    try:
+        report = check_claude_auth(
+            Path.cwd(),
+            claude_bin=args.claude_bin,
+            model=args.model,
+            timeout=args.timeout,
+        )
+    except (OSError, ValidationError, subprocess.TimeoutExpired) as exc:
+        return fail(exc)
+    if args.format == "json":
+        print(json.dumps(report, indent=2, sort_keys=True))
+    else:
+        print(render_claude_auth_report(report), end="")
+    return 0 if report.get("status") == "pass" else 1
+
+
+def cmd_review_claude_run(args: argparse.Namespace) -> int:
+    try:
+        path = run_claude_review(
+            Path.cwd(),
+            args.case,
+            args.order,
+            review_id=args.review_id,
+            claude_bin=args.claude_bin,
+            model=args.model,
+            dry_run=args.dry_run,
+            timeout=args.timeout,
+        )
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    action = "review request ready" if args.dry_run else "claude review written"
+    return ok(f"{action}: {display_path(path)}")
+
+
+def cmd_review_export(args: argparse.Namespace) -> int:
+    try:
+        path = export_review_bundle(
+            Path.cwd(),
+            args.case,
+            args.order,
+            tool=args.tool,
+            review_id=args.review_id,
+            output=Path(args.output) if args.output else None,
+        )
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return ok(f"review bundle exported: {display_path(path)}")
+
+
+def cmd_review_import(args: argparse.Namespace) -> int:
+    try:
+        path = import_review_artifact(Path.cwd(), args.case, Path(args.source), strict=args.strict, force=args.force)
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return ok(f"review imported: {display_path(path)}")
+
+
+def cmd_review_status(args: argparse.Namespace) -> int:
+    try:
+        status = review_status(Path.cwd(), args.case, profile=args.profile, order_id=args.order)
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    if args.format == "json":
+        print(json.dumps(status, indent=2, sort_keys=True))
+    else:
+        print(render_review_status(status))
+    return 0 if status["status"] == "satisfied" else 1
+
+
+def cmd_repo_status(args: argparse.Namespace) -> int:
+    root = Path(args.root).resolve() if args.root else Path.cwd()
+    if args.format == "json":
+        print(json.dumps({"schema": "agent-careflow.repo_status.v1", "root": root.as_posix(), "repositories": discover_repositories(root)}, indent=2, sort_keys=True))
+    else:
+        print(render_repo_status(root))
+    return 0
+
+
+def cmd_learning_new(args: argparse.Namespace) -> int:
+    try:
+        path = new_learning(Path.cwd(), args.case, args.title, source_incident=args.source_incident)
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return ok(f"learning created: {display_path(path)}")
+
+
+def cmd_learning_promote(args: argparse.Namespace) -> int:
+    try:
+        path = promote_learning(Path.cwd(), args.case, args.learning, Path(args.target), force=args.force)
+    except (OSError, ValidationError) as exc:
+        return fail(exc)
+    return ok(f"learning promoted: {display_path(path)}")
 
 
 def cmd_incident_new(args: argparse.Namespace) -> int:
@@ -193,7 +375,7 @@ def cmd_incident_new(args: argparse.Namespace) -> int:
         path = new_incident(Path.cwd(), args.case, args.trigger)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"incident created: {path}")
+    return ok(f"incident created: {display_path(path)}")
 
 
 def cmd_evidence_collect(args: argparse.Namespace) -> int:
@@ -201,7 +383,7 @@ def cmd_evidence_collect(args: argparse.Namespace) -> int:
         path = collect_evidence(Path.cwd(), args.case, args.kind)
     except (OSError, ValidationError) as exc:
         return fail(exc)
-    return ok(f"evidence collected: {path}")
+    return ok(f"evidence collected: {display_path(path)}")
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -336,6 +518,94 @@ def cmd_takt_export_policy(args: argparse.Namespace) -> int:
     return 0
 
 
+def _print_acceptance_and_status(report: dict[str, object], *, fmt: str) -> int:
+    print(render_acceptance_report(report, fmt=fmt), end="")
+    try:
+        ensure_acceptance_passed(report)
+    except ValidationError:
+        return 1
+    return 0
+
+
+def cmd_acceptance_profile(args: argparse.Namespace) -> int:
+    try:
+        report = run_profile_acceptance(Path.cwd(), args.profile, Path(args.target))
+    except ValidationError as exc:
+        return fail(exc)
+    return _print_acceptance_and_status(report, fmt=args.format)
+
+
+def cmd_acceptance_handoff(args: argparse.Namespace) -> int:
+    try:
+        report = run_handoff_acceptance(Path(args.target))
+    except ValidationError as exc:
+        return fail(exc)
+    return _print_acceptance_and_status(report, fmt=args.format)
+
+
+def cmd_acceptance_install_audit(args: argparse.Namespace) -> int:
+    try:
+        report = run_install_audit(Path(args.careflow_repo), Path(args.target_home), args.tool)
+    except ValidationError as exc:
+        return fail(exc)
+    return _print_acceptance_and_status(report, fmt=args.format)
+
+
+def cmd_acceptance_objective_audit(args: argparse.Namespace) -> int:
+    try:
+        report = run_objective_audit(Path(args.careflow_repo), args.case, profile=args.profile)
+    except ValidationError as exc:
+        return fail(exc)
+    return _print_acceptance_and_status(report, fmt=args.format)
+
+
+def cmd_acceptance_objective_matrix(args: argparse.Namespace) -> int:
+    try:
+        report = run_objective_matrix(Path(args.careflow_repo), args.case, profile=args.profile)
+    except ValidationError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    return _print_acceptance_and_status(report, fmt=args.format)
+
+
+def cmd_acceptance_transcript(args: argparse.Namespace) -> int:
+    try:
+        if args.live_codex:
+            report = run_live_codex_transcript_acceptance(Path(args.workdir), output=Path(args.output) if args.output else None, timeout=args.timeout)
+        elif args.live_claude:
+            report = run_live_claude_transcript_acceptance(Path(args.workdir), timeout=args.timeout)
+        elif args.file:
+            report = run_transcript_acceptance_from_file(Path(args.file))
+        else:
+            report = run_transcript_acceptance_from_text(sys.stdin.read(), label="stdin")
+    except (OSError, subprocess.TimeoutExpired, ValidationError) as exc:
+        return fail(exc)
+    return _print_acceptance_and_status(report, fmt=args.format)
+
+
+def cmd_codex_exec(args: argparse.Namespace) -> int:
+    stdin_text = sys.stdin.read() if not sys.stdin.isatty() else ""
+    codex_args = list(args.codex_args or [])
+    if codex_args and codex_args[0] == "--":
+        codex_args = codex_args[1:]
+    try:
+        result = run_guarded_codex_exec(
+            codex_args,
+            stdin_text=stdin_text,
+            codex_bin=args.codex_bin,
+            dry_run=args.dry_run,
+            probe_output=Path(args.probe_output) if args.probe_output else None,
+            cwd=Path.cwd(),
+        )
+    except OSError as exc:
+        return fail(exc)
+    if result.stdout:
+        print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
+    if result.stderr:
+        print(result.stderr, file=sys.stderr)
+    return result.exit_code
+
+
 def cmd_conformance_record(args: argparse.Namespace) -> int:
     try:
         append_record(output=Path(args.output), adapter=args.adapter, event=args.event, fixture=Path(args.fixture), notes=args.notes)
@@ -370,7 +640,9 @@ def cmd_conformance_status(args: argparse.Namespace) -> int:
 def cmd_hook(args: argparse.Namespace) -> int:
     try:
         payload = load_payload(sys.stdin.read())
-        if args.event == "permission-request":
+        if args.event == "session-start":
+            decision = evaluate_session_start(payload)
+        elif args.event == "permission-request":
             decision = evaluate_permission_request(payload, on_missing_context=args.on_missing_context)
         elif args.event == "user-prompt-submit":
             decision = evaluate_user_prompt_submit(payload)
@@ -384,7 +656,9 @@ def cmd_hook(args: argparse.Namespace) -> int:
         return fail(exc)
 
     if args.tool == "codex":
-        if args.event == "permission-request":
+        if args.event == "session-start":
+            print(codex_hooks.render_session_start(decision))
+        elif args.event == "permission-request":
             print(codex_hooks.render_permission_request(decision))
         elif args.event == "user-prompt-submit":
             print(codex_hooks.render_user_prompt_submit(decision))
@@ -395,7 +669,9 @@ def cmd_hook(args: argparse.Namespace) -> int:
         else:
             print(codex_hooks.render_pre_tool_use(decision))
     elif args.tool == "claude":
-        if args.event == "post-tool-use":
+        if args.event == "session-start":
+            print(claude_hooks.render_session_start(decision))
+        elif args.event == "post-tool-use":
             print(claude_hooks.render_post_tool_use(decision))
         elif args.event == "stop":
             print(claude_hooks.render_stop(decision))
@@ -424,6 +700,15 @@ def build_parser() -> argparse.ArgumentParser:
 
     doctor = sub.add_parser("doctor")
     doctor.set_defaults(func=cmd_doctor)
+
+    dashboard = sub.add_parser("dashboard")
+    dashboard.add_argument("--write", action="store_true")
+    dashboard.add_argument("--output")
+    dashboard.set_defaults(func=cmd_dashboard)
+
+    workspace = sub.add_parser("workspace")
+    workspace.add_argument("--write", action="store_true")
+    workspace.set_defaults(func=cmd_workspace)
 
     bootstrap = sub.add_parser("bootstrap")
     bootstrap.add_argument("--target", default=".")
@@ -502,6 +787,13 @@ def build_parser() -> argparse.ArgumentParser:
     order_status_parser.add_argument("--case", required=True)
     order_status_parser.add_argument("--order", required=True)
     order_status_parser.set_defaults(func=cmd_order_status)
+    order_result_skeleton = order_sub.add_parser("result-skeleton")
+    order_result_skeleton.add_argument("--case", required=True)
+    order_result_skeleton.add_argument("--order", required=True)
+    order_result_skeleton.add_argument("--status", default="complete")
+    order_result_skeleton.add_argument("--write", action="store_true")
+    order_result_skeleton.add_argument("--force", action="store_true")
+    order_result_skeleton.set_defaults(func=cmd_order_result_skeleton)
 
     result = sub.add_parser("result")
     result_sub = result.add_subparsers(dest="result_command", required=True)
@@ -511,10 +803,73 @@ def build_parser() -> argparse.ArgumentParser:
     result_validate.set_defaults(func=cmd_result_validate)
 
     review = sub.add_parser("review")
+    repo = sub.add_parser("repo")
+    repo_sub = repo.add_subparsers(dest="repo_command", required=True)
+    repo_status = repo_sub.add_parser("status")
+    repo_status.add_argument("--root")
+    repo_status.add_argument("--format", choices=["text", "json"], default="text")
+    repo_status.set_defaults(func=cmd_repo_status)
+
     review_sub = review.add_subparsers(dest="review_command", required=True)
+    review_new = review_sub.add_parser("new")
+    review_new.add_argument("--case", required=True)
+    review_new.add_argument("--tool", choices=["codex", "claude", "cursor", "human"], required=True)
+    review_new.add_argument("--review-id")
+    review_new.add_argument("--status", choices=["pass", "needs_changes", "blocked"], default="pass")
+    review_new.add_argument("--scope", default="PLAN, ORDER, RESULT, and evidence")
+    review_new.add_argument("--evidence", default="See case evidence directory")
+    review_new.add_argument("--recommendation", default="No blocking findings recorded.")
+    review_new.set_defaults(func=cmd_review_new)
+    review_require = review_sub.add_parser("require")
+    review_require.add_argument("--case", required=True)
+    review_require.add_argument("--tool", action="append", choices=["codex", "claude", "cursor", "human"], required=True)
+    review_require.add_argument("--strict", action="store_true")
+    review_require.set_defaults(func=cmd_review_require)
+    review_request = review_sub.add_parser("request")
+    review_request.add_argument("--case", required=True)
+    review_request.add_argument("--tool", choices=["codex", "claude", "cursor", "human"], required=True)
+    review_request.add_argument("--order", required=True)
+    review_request.add_argument("--review-id")
+    review_request.add_argument("--force", action="store_true")
+    review_request.set_defaults(func=cmd_review_request)
+    review_claude_auth = review_sub.add_parser("claude-auth")
+    review_claude_auth.add_argument("--claude-bin", default="claude")
+    review_claude_auth.add_argument("--model")
+    review_claude_auth.add_argument("--timeout", type=int, default=60)
+    review_claude_auth.add_argument("--format", choices=["text", "json"], default="text")
+    review_claude_auth.set_defaults(func=cmd_review_claude_auth)
+    review_claude_run = review_sub.add_parser("claude-run")
+    review_claude_run.add_argument("--case", required=True)
+    review_claude_run.add_argument("--order", required=True)
+    review_claude_run.add_argument("--review-id")
+    review_claude_run.add_argument("--claude-bin", default="claude")
+    review_claude_run.add_argument("--model")
+    review_claude_run.add_argument("--dry-run", action="store_true")
+    review_claude_run.add_argument("--timeout", type=int, default=300)
+    review_claude_run.set_defaults(func=cmd_review_claude_run)
+    review_export = review_sub.add_parser("export")
+    review_export.add_argument("--case", required=True)
+    review_export.add_argument("--tool", choices=["codex", "claude", "cursor", "human"], required=True)
+    review_export.add_argument("--order", required=True)
+    review_export.add_argument("--review-id")
+    review_export.add_argument("--output")
+    review_export.set_defaults(func=cmd_review_export)
+    review_import = review_sub.add_parser("import")
+    review_import.add_argument("--case", required=True)
+    review_import.add_argument("--source", required=True)
+    review_import.add_argument("--strict", action="store_true")
+    review_import.add_argument("--force", action="store_true")
+    review_import.set_defaults(func=cmd_review_import)
+    review_status_parser = review_sub.add_parser("status")
+    review_status_parser.add_argument("--case", required=True)
+    review_status_parser.add_argument("--profile", choices=["business", "private"], default="business")
+    review_status_parser.add_argument("--order", required=True)
+    review_status_parser.add_argument("--format", choices=["text", "json"], default="text")
+    review_status_parser.set_defaults(func=cmd_review_status)
     review_validate = review_sub.add_parser("validate")
     review_validate.add_argument("--case", required=True)
     review_validate.add_argument("--review", required=True)
+    review_validate.add_argument("--strict", action="store_true")
     review_validate.set_defaults(func=cmd_review_validate)
 
     incident = sub.add_parser("incident")
@@ -523,6 +878,20 @@ def build_parser() -> argparse.ArgumentParser:
     incident_new.add_argument("--case", required=True)
     incident_new.add_argument("--trigger", required=True)
     incident_new.set_defaults(func=cmd_incident_new)
+
+    learning = sub.add_parser("learning")
+    learning_sub = learning.add_subparsers(dest="learning_command", required=True)
+    learning_new = learning_sub.add_parser("new")
+    learning_new.add_argument("--case", required=True)
+    learning_new.add_argument("--title", required=True)
+    learning_new.add_argument("--source-incident")
+    learning_new.set_defaults(func=cmd_learning_new)
+    learning_promote = learning_sub.add_parser("promote")
+    learning_promote.add_argument("--case", required=True)
+    learning_promote.add_argument("--learning", required=True)
+    learning_promote.add_argument("--target", required=True)
+    learning_promote.add_argument("--force", action="store_true")
+    learning_promote.set_defaults(func=cmd_learning_promote)
 
     evidence = sub.add_parser("evidence")
     evidence_sub = evidence.add_subparsers(dest="evidence_command", required=True)
@@ -605,6 +974,54 @@ def build_parser() -> argparse.ArgumentParser:
     takt_export.add_argument("--output")
     takt_export.set_defaults(func=cmd_takt_export_policy)
 
+    acceptance = sub.add_parser("acceptance")
+    acceptance_sub = acceptance.add_subparsers(dest="acceptance_command", required=True)
+    acceptance_profile = acceptance_sub.add_parser("profile")
+    acceptance_profile.add_argument("--profile", required=True)
+    acceptance_profile.add_argument("--target", required=True)
+    acceptance_profile.add_argument("--format", choices=["text", "json"], default="text")
+    acceptance_profile.set_defaults(func=cmd_acceptance_profile)
+    acceptance_handoff = acceptance_sub.add_parser("handoff")
+    acceptance_handoff.add_argument("--target", required=True)
+    acceptance_handoff.add_argument("--format", choices=["text", "json"], default="text")
+    acceptance_handoff.set_defaults(func=cmd_acceptance_handoff)
+    acceptance_install_audit = acceptance_sub.add_parser("install-audit")
+    acceptance_install_audit.add_argument("--target-home", required=True)
+    acceptance_install_audit.add_argument("--careflow-repo", default=str(Path.cwd()))
+    acceptance_install_audit.add_argument("--tool", action="append", choices=["codex", "claude"], default=[])
+    acceptance_install_audit.add_argument("--format", choices=["text", "json"], default="text")
+    acceptance_install_audit.set_defaults(func=cmd_acceptance_install_audit)
+    acceptance_objective = acceptance_sub.add_parser("objective-audit")
+    acceptance_objective.add_argument("--case", default="ACF-RELIABILITY-SUPERPOWERS")
+    acceptance_objective.add_argument("--careflow-repo", default=str(Path.cwd()))
+    acceptance_objective.add_argument("--profile", choices=["business", "private"], default="business")
+    acceptance_objective.add_argument("--format", choices=["text", "json"], default="text")
+    acceptance_objective.set_defaults(func=cmd_acceptance_objective_audit)
+    acceptance_matrix = acceptance_sub.add_parser("objective-matrix")
+    acceptance_matrix.add_argument("--case", default="ACF-RELIABILITY-SUPERPOWERS")
+    acceptance_matrix.add_argument("--careflow-repo", default=str(Path.cwd()))
+    acceptance_matrix.add_argument("--profile", choices=["business", "private"], default="business")
+    acceptance_matrix.add_argument("--format", choices=["text", "json"], default="text")
+    acceptance_matrix.set_defaults(func=cmd_acceptance_objective_matrix)
+    acceptance_transcript = acceptance_sub.add_parser("transcript")
+    acceptance_transcript.add_argument("--file")
+    acceptance_transcript.add_argument("--live-codex", action="store_true")
+    acceptance_transcript.add_argument("--live-claude", action="store_true")
+    acceptance_transcript.add_argument("--workdir", default="/tmp/agent-careflow-live-codex")
+    acceptance_transcript.add_argument("--output")
+    acceptance_transcript.add_argument("--timeout", type=int, default=120)
+    acceptance_transcript.add_argument("--format", choices=["text", "json"], default="text")
+    acceptance_transcript.set_defaults(func=cmd_acceptance_transcript)
+
+    codex_cmd = sub.add_parser("codex")
+    codex_sub = codex_cmd.add_subparsers(dest="codex_command", required=True)
+    codex_exec = codex_sub.add_parser("exec")
+    codex_exec.add_argument("--codex-bin", default="codex")
+    codex_exec.add_argument("--dry-run", action="store_true")
+    codex_exec.add_argument("--probe-output")
+    codex_exec.add_argument("codex_args", nargs=argparse.REMAINDER)
+    codex_exec.set_defaults(func=cmd_codex_exec)
+
     conformance = sub.add_parser("conformance")
     conformance_sub = conformance.add_subparsers(dest="conformance_command", required=True)
     conformance_record = conformance_sub.add_parser("record")
@@ -627,14 +1044,14 @@ def build_parser() -> argparse.ArgumentParser:
     for tool_name in ("codex", "claude", "cursor"):
         tool_parser = hook_sub.add_parser(tool_name)
         event_sub = tool_parser.add_subparsers(dest="event", required=True)
-        events = ["pre-tool-use", "post-tool-use", "stop"]
+        events = ["session-start", "pre-tool-use", "post-tool-use", "stop"]
         if tool_name == "codex":
             events.extend(["permission-request", "user-prompt-submit"])
         if tool_name == "claude":
             events.extend(["subagent-start", "subagent-stop"])
         for event_name in events:
             event_parser = event_sub.add_parser(event_name)
-            event_parser.add_argument("--on-missing-context", choices=["warn", "deny"], default="warn")
+            event_parser.add_argument("--on-missing-context", choices=["warn", "deny", "hybrid"], default="warn")
             event_parser.add_argument("--incident-on-deny", action="store_true")
             event_parser.set_defaults(func=cmd_hook)
 

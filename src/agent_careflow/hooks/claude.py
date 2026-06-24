@@ -42,3 +42,9 @@ def render_subagent_start(decision: Decision) -> str:
 
 def render_subagent_stop(decision: Decision) -> str:
     return render_stop(decision)
+
+
+def render_session_start(decision: Decision) -> str:
+    if decision.status == DecisionStatus.DENY:
+        return dumps({"decision": "block", "reason": decision.reason})
+    return dumps({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": decision.reason}})

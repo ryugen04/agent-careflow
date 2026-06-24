@@ -1,0 +1,101 @@
+{
+  "checks": [
+    {
+      "details": "source repo ready: /home/glaucus03/dev/projects/agent-careflow",
+      "name": "careflow-source",
+      "status": "pass"
+    },
+    {
+      "details": "/tmp/agent-careflow-ord-017-home.W5DWqf/.claude/settings.json contains 'agent-careflow hook claude session-start'",
+      "name": "claude-settings-careflow-hook",
+      "status": "pass"
+    },
+    {
+      "details": "/tmp/agent-careflow-ord-017-home.W5DWqf/.local/bin/claude-careflow contains 'agent-careflow workspace --write'",
+      "name": "claude-careflow-launcher",
+      "status": "pass"
+    },
+    {
+      "details": "/tmp/agent-careflow-ord-017-home.W5DWqf/.local/bin/claude-careflow contains 'exec claude'",
+      "name": "claude-careflow-launcher-delegates",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/using-agent-careflow",
+      "name": "claude-skill-using-agent-careflow",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/brainstorming",
+      "name": "claude-skill-brainstorming",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/writing-plans",
+      "name": "claude-skill-writing-plans",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/subagent-driven-development",
+      "name": "claude-skill-subagent-driven-development",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/executing-plans",
+      "name": "claude-skill-executing-plans",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/verification-before-completion",
+      "name": "claude-skill-verification-before-completion",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/requesting-code-review",
+      "name": "claude-skill-requesting-code-review",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/receiving-code-review",
+      "name": "claude-skill-receiving-code-review",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/systematic-debugging",
+      "name": "claude-skill-systematic-debugging",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/test-driven-development",
+      "name": "claude-skill-test-driven-development",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/using-git-worktrees",
+      "name": "claude-skill-using-git-worktrees",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/dispatching-parallel-agents",
+      "name": "claude-skill-dispatching-parallel-agents",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/finishing-a-development-branch",
+      "name": "claude-skill-finishing-a-development-branch",
+      "status": "pass"
+    },
+    {
+      "details": "linked to /home/glaucus03/dev/projects/agent-careflow/skills/writing-skills",
+      "name": "claude-skill-writing-skills",
+      "status": "pass"
+    }
+  ],
+  "control_repo": "/home/glaucus03/dev/projects/agent-careflow",
+  "schema": "agent-careflow.acceptance.install_audit.v1",
+  "status": "pass",
+  "target": "/tmp/agent-careflow-ord-017-home.W5DWqf",
+  "tools": [
+    "claude"
+  ]
+}

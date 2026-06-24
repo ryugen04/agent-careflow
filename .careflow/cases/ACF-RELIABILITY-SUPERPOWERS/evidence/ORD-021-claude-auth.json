@@ -1,0 +1,10 @@
+{
+  "claude_bin": "claude",
+  "details": "Failed to authenticate. API Error: 401 Invalid authentication credentials",
+  "exit_code": 1,
+  "fallback_used": false,
+  "model": "sonnet",
+  "root": "/home/glaucus03/dev/projects/agent-careflow",
+  "schema": "agent-careflow.claude_auth.v1",
+  "status": "fail"
+}

@@ -1,0 +1,3 @@
+dashboard written: .careflow/INDEX.md
+
+exit=0

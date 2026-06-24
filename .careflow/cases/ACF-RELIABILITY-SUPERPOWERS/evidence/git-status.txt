@@ -1,0 +1,39 @@
+$ git status --short
+ M README.md
+ M docs/design.md
+ M docs/dotfiles-distribution.md
+ M rules/claude/settings.json
+ M rules/codex/hooks.json
+ M src/agent_careflow/bootstrap/profiles.py
+ M src/agent_careflow/bootstrap/target_repo.py
+ M src/agent_careflow/cli.py
+ M src/agent_careflow/conformance.py
+ M src/agent_careflow/hooks/claude.py
+ M src/agent_careflow/hooks/codex.py
+ M src/agent_careflow/hooks/common.py
+ M src/agent_careflow/lifecycle.py
+ M src/agent_careflow/orders.py
+ M tests/test_bootstrap.py
+ M tests/test_conformance.py
+ M tests/test_hooks.py
+ M tests/test_lifecycle.py
+ M tests/test_orders.py
+?? .agent/
+?? .careflow/INDEX.md
+?? .careflow/cases/ACF-RELIABILITY-SUPERPOWERS/
+?? .careflow/state.json
+?? docs/learnings/
+?? skills/
+?? src/agent_careflow/acceptance.py
+?? src/agent_careflow/bootstrap_context.py
+?? src/agent_careflow/context.py
+?? src/agent_careflow/dashboard.py
+?? src/agent_careflow/workspace.py
+?? tests/fixtures/hooks/codex_session_start.json
+?? tests/test_acceptance.py
+?? tests/test_bootstrap_context.py
+?? tests/test_context.py
+?? tests/test_dashboard.py
+?? tests/test_skills.py
+?? tests/test_workspace.py
+?? third_party/

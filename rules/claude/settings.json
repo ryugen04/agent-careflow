@@ -5,6 +5,7 @@
         "hooks": [
           {
             "command": "agent-careflow hook claude post-tool-use --on-missing-context warn",
+            "timeout": 30,
             "type": "command"
           }
         ],
@@ -15,18 +16,32 @@
       {
         "hooks": [
           {
-            "command": "agent-careflow hook claude pre-tool-use --on-missing-context warn",
+            "command": "agent-careflow hook claude pre-tool-use --on-missing-context hybrid --incident-on-deny",
+            "timeout": 30,
             "type": "command"
           }
         ],
         "matcher": "Bash|Write|Edit|MultiEdit"
       }
     ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "agent-careflow hook claude session-start",
+            "timeout": 30,
+            "type": "command"
+          }
+        ],
+        "matcher": "startup|resume|clear"
+      }
+    ],
     "Stop": [
       {
         "hooks": [
           {
-            "command": "agent-careflow hook claude stop",
+            "command": "agent-careflow hook claude stop --incident-on-deny",
+            "timeout": 30,
             "type": "command"
           }
         ]
@@ -37,6 +52,7 @@
         "hooks": [
           {
             "command": "agent-careflow hook claude subagent-start",
+            "timeout": 30,
             "type": "command"
           }
         ]
@@ -47,6 +63,7 @@
         "hooks": [
           {
             "command": "agent-careflow hook claude subagent-stop",
+            "timeout": 30,
             "type": "command"
           }
         ]

@@ -1,0 +1,8 @@
+review-status=missing case=ACF-RELIABILITY-SUPERPOWERS profile=business order=ORD-014
+codex: satisfied - REVIEW-CODEX-ORD-005.review.md
+claude: invalid - /home/glaucus03/dev/projects/agent-careflow/.careflow/cases/ACF-RELIABILITY-SUPERPOWERS/reviews/REVIEW-CLAUDE-ORD-005.review.md: placeholder review evidence is not allowed in strict mode: placeholder
+next commands:
+agent-careflow review export --case ACF-RELIABILITY-SUPERPOWERS --tool claude --order ORD-014 --review-id REVIEW-CLAUDE-ORD-014 --output /tmp/REVIEW-CLAUDE-ORD-014.request.md
+agent-careflow review claude-run --case ACF-RELIABILITY-SUPERPOWERS --order ORD-014 --review-id REVIEW-CLAUDE-ORD-014
+agent-careflow review import --case ACF-RELIABILITY-SUPERPOWERS --source /path/to/REVIEW-CLAUDE-ORD-014.review.md --strict --force
+agent-careflow review require --case ACF-RELIABILITY-SUPERPOWERS --tool codex --tool claude --strict
